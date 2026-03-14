@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="QuizSelf">
+<title>QuizSelf — Self-Paced Quiz Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get, update, onValue, push, remove }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+           sendEmailVerification, signOut, onAuthStateChanged, updateProfile }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ── REPLACE WITH YOUR NEW FIREBASE PROJECT CONFIG ──
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDzT-nWQy7yCAHUB47ySeio_ZMHZYciPPY",
+    authDomain:        "quizself-da172.firebaseapp.com",
+    databaseURL:       "https://quizself-da172-default-rtdb.firebaseio.com",
+    projectId:         "quizself-da172",
+    storageBucket:     "quizself-da172.firebasestorage.app",
+    messagingSenderId: "603126964069",
+    appId:             "1:603126964069:web:8e9c4d225db7a6e7f68b8c"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getDatabase(app);
+  const auth = getAuth(app);
+
+  window._db=db; window._ref=ref; window._set=set; window._get=get;
+  window._update=update; window._onValue=onValue; window._push=push;
+  window._remove=remove; window._auth=auth;
+  window._createUser=createUserWithEmailAndPassword;
+  window._signIn=signInWithEmailAndPassword;
+  window._sendVerification=sendEmailVerification;
+  window._signOut=signOut;
+  window._onAuthStateChanged=onAuthStateChanged;
+  window._firebaseReady=true;
+
+  // Auto-restore session
+  onAuthStateChanged(auth, async user=>{
+    if(user){
+      // Check if super/admin
+      if(user.email===SUPER_EMAIL){
+        currentUser=user;
+        const p=await dbGet('hosts/'+user.uid);
+        const superProf=p||{uid:user.uid,email:user.email,name:'Super Admin',plan:'super',planExpiry:null};
+        superProf.uid   = user.uid;
+        superProf.email = superProf.email || user.email;
+        superProf.plan  = superProf.plan  || 'super';
+        currentHostProfile=superProf;
+        if(!p) await dbSet('hosts/'+user.uid,superProf);
+        S('host-dashboard'); loadHostDashboard();
+        return;
+      }
+      const p=await dbGet('hosts/'+user.uid);
+      if(p){currentUser=user;currentHostProfile=p;S('host-dashboard');loadHostDashboard();}
+    }
+  });
+</script>
+<style>
+:root{
+  --bg:#0f0f1a;--card:#1a1a2e;--card2:#16213e;
+  --gold:#FFD700;--purple:#7c3aed;--pink:#c026d3;
+  --green:#2ED573;--red:#FF4757;--blue:#1E90FF;
+  --text:#f0f0f0;--muted:#aaa;
+  --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;padding:1rem;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+.card{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:480px;box-shadow:0 8px 32px #0006;}
+.card2{background:var(--card2);border-radius:var(--radius);padding:1.2rem;width:100%;}
+.btn{border:none;border-radius:50px;cursor:pointer;font-weight:700;padding:.75rem 1.8rem;font-size:1rem;transition:all .2s;color:#fff;}
+.btn-p{background:linear-gradient(135deg,var(--purple),var(--pink));}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 20px #7c3aed44;}
+.btn-g{background:linear-gradient(135deg,#16a34a,#15803d);}
+.btn-b{background:linear-gradient(135deg,#1d4ed8,#1e40af);}
+.btn-r{background:linear-gradient(135deg,var(--red),#c0392b);}
+.btn-k{background:#ffffff15;color:var(--muted);}
+.btn-k:hover{background:#ffffff25;}
+.btn-sm{padding:.45rem 1.1rem;font-size:.85rem;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.inp{width:100%;background:#ffffff0f;border:1.5px solid #ffffff22;border-radius:12px;color:#fff;padding:.75rem 1rem;font-size:1rem;outline:none;margin-bottom:.8rem;transition:border .2s;}
+.inp:focus{border-color:var(--gold);}
+.inp::placeholder{color:#666;}
+.gold{color:var(--gold);}
+.muted{color:var(--muted);}
+.fade{animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.badge{display:inline-block;padding:.25rem .7rem;border-radius:50px;font-size:.75rem;font-weight:700;}
+.badge-live{background:#FF475722;color:var(--red);border:1px solid var(--red);}
+.badge-end{background:#2ED57322;color:var(--green);border:1px solid var(--green);}
+.badge-exp{background:#ffffff11;color:var(--muted);border:1px solid #ffffff33;}
+.badge-free{background:#1E90FF22;color:var(--blue);border:1px solid var(--blue);}
+.badge-paid{background:#FFD70022;color:var(--gold);border:1px solid var(--gold);}
+.badge-premium{background:#c026d322;color:var(--pink);border:1px solid var(--pink);}
+.badge-super{background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed;}
+.progress-bar{height:8px;background:#ffffff11;border-radius:4px;overflow:hidden;margin-bottom:1rem;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--pink));border-radius:4px;transition:width .3s;}
+.timer-ring{position:relative;display:flex;align-items:center;justify-content:center;}
+.stat-card{background:var(--card2);border-radius:12px;padding:1rem;text-align:center;flex:1;}
+.stat-num{font-size:2rem;font-weight:900;color:var(--gold);}
+.stat-lbl{font-size:.75rem;color:var(--muted);margin-top:.2rem;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th{color:var(--muted);padding:.6rem .8rem;text-align:left;border-bottom:1px solid #ffffff11;font-weight:600;}
+td{padding:.6rem .8rem;border-bottom:1px solid #ffffff08;vertical-align:middle;}
+tr:hover td{background:#ffffff05;}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.2rem;background:#ffffff08;border-radius:50px;padding:.3rem;}
+.tab{flex:1;text-align:center;padding:.5rem;border-radius:50px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--muted);transition:all .2s;}
+.tab.active{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;}
+.opt-btn{width:100%;background:#ffffff08;border:2px solid #ffffff15;border-radius:14px;color:#fff;padding:1rem 1.2rem;font-size:1rem;font-weight:600;cursor:pointer;text-align:left;transition:all .2s;margin-bottom:.6rem;display:flex;align-items:center;gap:.8rem;}
+.opt-btn:hover{border-color:var(--gold);background:#FFD70011;}
+.opt-btn.selected{border-color:var(--gold);background:#FFD70022;}
+.opt-btn.correct{border-color:var(--green);background:#2ED57322;color:var(--green);}
+.opt-btn.wrong{border-color:var(--red);background:#FF475722;color:var(--red);}
+.opt-btn:disabled{cursor:not-allowed;}
+.lbl{font-size:.82rem;color:var(--muted);margin-bottom:.3rem;display:block;}
+select.inp{appearance:none;}
+.err-box{color:var(--red);font-size:.88rem;padding:.6rem .9rem;background:#FF475711;border-radius:10px;margin-bottom:.8rem;display:none;}
+.ok-box{color:var(--green);font-size:.88rem;padding:.6rem .9rem;background:#2ED57311;border-radius:10px;margin-bottom:.8rem;display:none;}
+.q-shape{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;}
+.topbar{width:100%;max-width:900px;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding:.5rem 0;}
+@media(max-width:600px){.card{padding:1.2rem;}.btn{padding:.65rem 1.3rem;font-size:.95rem;}}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing" class="screen active">
+  <div style="text-align:center;padding:3rem 1rem 2rem;">
+    <div style="font-size:4rem;margin-bottom:.5rem;">🧠</div>
+    <div style="font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;">QuizSelf</div>
+    <div style="color:var(--muted);font-size:1.1rem;margin-bottom:2.5rem;">Self-Paced Quiz Platform</div>
+    <div style="display:flex;flex-direction:column;gap:1rem;max-width:320px;margin:auto;">
+      <button class="btn btn-p" style="font-size:1.1rem;padding:1.1rem;" onclick="S('host-login')">🎓 Host Login</button>
+      <button class="btn btn-b" style="font-size:1.1rem;padding:1.1rem;" onclick="S('take-quiz')">📝 Take a Quiz</button>
+      <button class="btn btn-k btn-sm" onclick="showAdminLogin()">🔐 Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOST LOGIN -->
+<div id="host-login" class="screen">
+  <div style="width:100%;max-width:440px;margin:auto;padding-top:2rem;">
+    <div class="topbar" style="max-width:440px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">🎓 Host Login</span>
+      <span></span>
+    </div>
+    <div class="card">
+      <div id="hl-form">
+        <h2 class="gold" style="margin-bottom:1.2rem;font-size:1.4rem;">Welcome Back</h2>
+        <input id="hl-email" class="inp" type="email" placeholder="Email">
+        <input id="hl-pass"  class="inp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')hostLogin()">
+        <div id="hl-err" class="err-box"></div>
+        <button class="btn btn-p" style="width:100%;padding:1rem;" onclick="hostLogin()">Login 🚀</button>
+        <div style="text-align:center;margin-top:1rem;color:var(--muted);font-size:.9rem;">
+          No account? <span class="gold" style="cursor:pointer;font-weight:700;" onclick="showRegister()">Register here</span>
+        </div>
+      </div>
+      <div id="hl-register" style="display:none;">
+        <h2 class="gold" style="margin-bottom:1.2rem;font-size:1.4rem;">Create Host Account</h2>
+        <input id="r-name"    class="inp" placeholder="Full Name">
+        <input id="r-mobile"  class="inp" placeholder="Mobile Number" type="tel">
+        <input id="r-city"    class="inp" placeholder="City">
+        <input id="r-country" class="inp" placeholder="Country">
+        <input id="r-org"     class="inp" placeholder="Organisation / Institution">
+        <input id="r-email"   class="inp" type="email" placeholder="Email">
+        <input id="r-pass"    class="inp" type="password" placeholder="Password (min 6 chars)">
+        <div id="r-err" class="err-box"></div>
+        <button class="btn btn-p" style="width:100%;padding:1rem;" onclick="hostRegister()">Register & Verify Email 📧</button>
+        <div style="text-align:center;margin-top:1rem;color:var(--muted);font-size:.9rem;">
+          Already have account? <span class="gold" style="cursor:pointer;font-weight:700;" onclick="showLoginForm()">Login</span>
+        </div>
+      </div>
+      <div id="hl-verify" style="display:none;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:.8rem;">📧</div>
+        <h3 class="gold" style="margin-bottom:.8rem;">Verify Your Email</h3>
+        <div style="color:var(--muted);font-size:.9rem;line-height:1.7;margin-bottom:1.2rem;" id="verify-msg">A verification link has been sent. Click it then return here.</div>
+        <div id="v-err" class="err-box"></div>
+        <div id="v-ok"  class="ok-box"></div>
+        <button class="btn btn-g" style="width:100%;margin-bottom:.7rem;" onclick="checkVerification()">✅ I've Verified — Continue</button>
+        <button class="btn btn-k btn-sm" style="width:100%;" onclick="resendVerification()">Resend Email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOST DASHBOARD -->
+<div id="host-dashboard" class="screen">
+  <div style="width:100%;max-width:900px;">
+    <div class="topbar">
+      <div>
+        <div style="font-weight:900;font-size:1.2rem;">🧠 QuizSelf</div>
+        <div id="hd-plan-badge" style="margin-top:.2rem;"></div>
+      </div>
+      <div style="display:flex;gap:.6rem;align-items:center;">
+        <button class="btn btn-p btn-sm" onclick="S('quiz-setup');initSetup()">+ New Quiz</button>
+        <button class="btn btn-k btn-sm" onclick="doSignOut()">Sign Out</button>
+      </div>
+    </div>
+    <div id="hd-welcome" style="margin-bottom:1.2rem;font-size:1.1rem;color:var(--muted);"></div>
+    <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;" id="hd-stats"></div>
+    <h3 class="gold" style="margin-bottom:1rem;">📋 Your Quizzes</h3>
+    <div id="hd-quizzes" style="display:grid;gap:1rem;"></div>
+  </div>
+</div>
+
+<!-- QUIZ SETUP -->
+<div id="quiz-setup" class="screen">
+  <div style="width:100%;max-width:620px;">
+    <div class="topbar" style="max-width:620px;">
+      <button class="btn btn-k btn-sm" onclick="S('host-dashboard');loadHostDashboard()">← Back</button>
+      <span class="gold" style="font-weight:800;">⚙️ New Quiz</span>
+      <span></span>
+    </div>
+    <div class="card" style="max-width:100%;">
+
+      <h3 class="gold" style="margin-bottom:1rem;">📁 Step 1 — Upload Questions</h3>
+      <div style="border:2px dashed #ffffff22;border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer;" onclick="document.getElementById('qs-file').click()">
+        <div style="font-size:2rem;margin-bottom:.4rem;">📊</div>
+        <div id="qs-label" style="font-weight:700;color:var(--gold);">Click to upload Excel (.xlsx)</div>
+        <div style="color:var(--muted);font-size:.8rem;margin-top:.3rem;">Columns: Question | Opt A | Opt B | Opt C | Opt D | Answer | Score</div>
+        <input type="file" id="qs-file" accept=".xlsx,.xls" style="display:none;" onchange="loadQuizXL(this)">
+      </div>
+      <div id="qs-preview" style="margin-bottom:1rem;"></div>
+
+      <h3 class="gold" style="margin-bottom:1rem;">⚙️ Step 2 — Quiz Settings</h3>
+      <label class="lbl">Quiz Title</label>
+      <input id="qs-title" class="inp" placeholder="e.g. Science Chapter 5 Quiz">
+      <label class="lbl">Quiz Description (optional)</label>
+      <input id="qs-desc" class="inp" placeholder="Brief description for participants">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem;">
+        <div>
+          <label class="lbl">Total Quiz Duration (minutes)</label>
+          <input id="qs-duration" class="inp" type="number" min="1" max="180" value="30" style="margin-bottom:0;">
+        </div>
+        <div>
+          <label class="lbl">Negative Marking (marks deducted)</label>
+          <input id="qs-negative" class="inp" type="number" min="0" max="10" step="0.5" value="0" style="margin-bottom:0;">
+        </div>
+      </div>
+
+      <h3 class="gold" style="margin-bottom:1rem;margin-top:.8rem;">⚡ Step 3 — Quiz Mode</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem;">
+        <div id="mode-normal" class="card2" style="cursor:pointer;border:2px solid var(--purple);text-align:center;padding:1.2rem;" onclick="selectMode('normal')">
+          <div style="font-size:2rem;">📝</div>
+          <div style="font-weight:700;margin-top:.4rem;">Normal</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem;">Total time for all questions. Auto-submits on expiry.</div>
+        </div>
+        <div id="mode-flash" class="card2" style="cursor:pointer;border:2px solid #ffffff15;text-align:center;padding:1.2rem;" onclick="selectMode('flash')">
+          <div style="font-size:2rem;">⚡</div>
+          <div style="font-weight:700;margin-top:.4rem;">Flash Quiz</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem;">Time per question. Score depends on speed.</div>
+          <div id="flash-plan-note" style="font-size:.72rem;color:var(--red);margin-top:.3rem;display:none;">⚠️ Free plan: 2hr limit</div>
+        </div>
+      </div>
+      <div id="qs-mode-val" style="display:none;margin-bottom:.8rem;padding:.6rem 1rem;background:#FFD70011;border-radius:10px;font-size:.85rem;color:var(--gold);"></div>
+
+      <div id="err-setup" class="err-box"></div>
+      <button id="qs-create" class="btn btn-p" style="width:100%;padding:1rem;font-size:1.1rem;" onclick="createQuiz()" disabled>🚀 Create Quiz & Go Live</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ MANAGE (host view of a live quiz) -->
+<div id="quiz-manage" class="screen">
+  <div style="width:100%;max-width:700px;">
+    <div class="topbar" style="max-width:700px;">
+      <button class="btn btn-k btn-sm" onclick="S('host-dashboard');loadHostDashboard()">← Dashboard</button>
+      <span class="gold" style="font-weight:800;" id="qm-title">Quiz</span>
+      <span></span>
+    </div>
+    <div class="card" style="max-width:100%;margin-bottom:1rem;">
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+        <div>
+          <div id="qm-status-badge"></div>
+          <div style="margin-top:.5rem;color:var(--muted);font-size:.85rem;" id="qm-expiry"></div>
+        </div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+          <button class="btn btn-b btn-sm" onclick="copyQuizLink()">📋 Copy Link</button>
+          <button class="btn btn-r btn-sm" id="qm-end-btn" onclick="endQuizNow()">🏁 End Quiz</button>
+        </div>
+      </div>
+      <div style="margin-top:1rem;padding:1rem;background:#ffffff08;border-radius:12px;">
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:.3rem;">Share this link with participants:</div>
+        <div id="qm-link" style="word-break:break-all;color:var(--gold);font-size:.9rem;font-weight:600;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;" id="qm-stats"></div>
+    <h3 class="gold" style="margin-bottom:1rem;">🏆 Live Leaderboard</h3>
+    <div id="qm-leaderboard" style="display:grid;gap:.6rem;"></div>
+  </div>
+</div>
+
+<!-- TAKE QUIZ (participant join) -->
+<div id="take-quiz" class="screen">
+  <div style="width:100%;max-width:420px;margin:auto;padding-top:2rem;">
+    <div class="topbar" style="max-width:420px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">📝 Join Quiz</span>
+      <span></span>
+    </div>
+    <div class="card">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:3rem;">🧠</div>
+        <div style="font-size:1.1rem;color:var(--muted);">Enter the Quiz Code given by your host</div>
+      </div>
+      <input id="tq-code" class="inp" placeholder="QUIZ CODE" maxlength="12"
+        style="text-align:center;font-size:1.5rem;letter-spacing:.3rem;font-weight:700;"
+        oninput="this.value=this.value.toUpperCase()">
+      <input id="tq-name" class="inp" placeholder="Your Full Name" maxlength="40">
+      <input id="tq-email" class="inp" type="email" placeholder="Email (optional — for analytics)">
+      <div id="tq-err" class="err-box"></div>
+      <button id="tq-btn" class="btn btn-p" style="width:100%;padding:1rem;font-size:1.1rem;" onclick="joinQuiz()">Start Quiz 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ ATTEMPT (participant answering) -->
+<div id="quiz-attempt" class="screen" style="padding:0;">
+  <div style="width:100%;max-width:620px;margin:auto;padding:1rem;">
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding:.5rem 0;">
+      <div style="font-size:.9rem;color:var(--muted);" id="qa-qnum">Q 1 / 10</div>
+      <div id="qa-timer-wrap" style="text-align:center;">
+        <div id="qa-timer" style="font-size:1.6rem;font-weight:900;color:var(--gold);"></div>
+        <div id="qa-timer-lbl" style="font-size:.72rem;color:var(--muted);"></div>
+      </div>
+      <div style="font-size:.9rem;color:var(--gold);font-weight:700;" id="qa-score-disp">Score: 0</div>
+    </div>
+    <!-- Progress -->
+    <div class="progress-bar"><div class="progress-fill" id="qa-progress" style="width:0%"></div></div>
+    <!-- Question -->
+    <div class="card" style="max-width:100%;margin-bottom:1rem;">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.8rem;" id="qa-mode-lbl"></div>
+      <div id="qa-qtxt" style="font-size:clamp(1.2rem,3vw,1.6rem);font-weight:700;line-height:1.5;margin-bottom:1.2rem;"></div>
+      <div id="qa-opts"></div>
+    </div>
+    <!-- Action buttons -->
+    <div style="display:flex;gap:.8rem;">
+      <button id="qa-submit" class="btn btn-g" style="flex:1;padding:1rem;font-size:1rem;" onclick="submitAnswer()">Submit Answer ✅</button>
+      <button id="qa-skip"   class="btn btn-k" style="flex:1;padding:1rem;font-size:1rem;" onclick="skipQuestion()">Skip ⏭</button>
+    </div>
+    <div id="qa-feedback" style="margin-top:.8rem;text-align:center;min-height:2rem;"></div>
+  </div>
+</div>
+
+<!-- QUIZ RESULT (participant final) -->
+<div id="quiz-result" class="screen">
+  <div style="width:100%;max-width:520px;margin:auto;padding-top:2rem;">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:4rem;" id="qr-emoji">🎉</div>
+      <div style="font-size:2rem;font-weight:900;color:var(--gold);margin-bottom:.3rem;" id="qr-score"></div>
+      <div style="color:var(--muted);" id="qr-subtitle"></div>
+    </div>
+    <div class="card" style="max-width:100%;margin-bottom:1rem;">
+      <div style="display:flex;gap:1rem;text-align:center;flex-wrap:wrap;">
+        <div class="stat-card"><div class="stat-num" id="qr-correct" style="color:var(--green);">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-card"><div class="stat-num" id="qr-wrong" style="color:var(--red);">0</div><div class="stat-lbl">Wrong</div></div>
+        <div class="stat-card"><div class="stat-num" id="qr-skipped" style="color:var(--muted);">0</div><div class="stat-lbl">Skipped</div></div>
+        <div class="stat-card"><div class="stat-num" id="qr-time" style="color:var(--blue);">0s</div><div class="stat-lbl">Time Taken</div></div>
+      </div>
+    </div>
+    <div class="card" style="max-width:100%;margin-bottom:1rem;">
+      <h3 class="gold" style="margin-bottom:1rem;">📋 Question Summary</h3>
+      <div id="qr-summary" style="display:grid;gap:.5rem;max-height:40vh;overflow-y:auto;"></div>
+    </div>
+    <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
+      <button class="btn btn-b" style="flex:1;" onclick="S('quiz-leaderboard');loadLeaderboard(currentQuizId)">🏆 Leaderboard</button>
+      <button class="btn btn-k" style="flex:1;" onclick="S('landing')">🏠 Home</button>
+    </div>
+    <div id="qr-retake" style="margin-top:.8rem;text-align:center;"></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="quiz-leaderboard" class="screen">
+  <div style="width:100%;max-width:560px;margin:auto;padding-top:2rem;">
+    <div class="topbar" style="max-width:560px;">
+      <button class="btn btn-k btn-sm" onclick="history.back()">← Back</button>
+      <span class="gold" style="font-weight:800;">🏆 Leaderboard</span>
+      <button class="btn btn-k btn-sm" onclick="loadLeaderboard(currentQuizId)">🔄</button>
+    </div>
+    <div id="lb-quiz-info" style="text-align:center;margin-bottom:1.2rem;"></div>
+    <div id="lb-cards" style="display:grid;gap:.7rem;"></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login" class="screen">
+  <div style="width:100%;max-width:400px;margin:auto;padding-top:3rem;">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:2.5rem;">🛡️</div>
+        <h2 class="gold">Admin Login</h2>
+      </div>
+      <input id="al-email" class="inp" type="email" placeholder="Admin Email">
+      <input id="al-pass"  class="inp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()">
+      <div id="al-err" class="err-box"></div>
+      <button class="btn btn-p" style="width:100%;padding:1rem;" onclick="adminLogin()">Login 🔐</button>
+      <div style="text-align:center;margin-top:1rem;">
+        <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard" class="screen">
+  <div style="width:100%;max-width:960px;">
+    <div class="topbar">
+      <div style="font-weight:900;font-size:1.2rem;">🛡️ QuizSelf Admin</div>
+      <div style="display:flex;gap:.6rem;">
+        <button class="btn btn-p btn-sm" onclick="loadAdminDashboard()">🔄 Refresh</button>
+        <button class="btn btn-k btn-sm" onclick="adminSignOut()">Sign Out</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;" id="ad-stats"></div>
+    <div class="tab-bar" style="max-width:100%;">
+      <div class="tab active" onclick="adTab('hosts')">👥 Hosts</div>
+      <div class="tab" onclick="adTab('quizzes')">📋 Quizzes</div>
+      <div class="tab" onclick="adTab('analytics')">📊 Analytics</div>
+    </div>
+    <div id="ad-hosts" class="ad-panel">
+      <div style="margin-bottom:1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+        <input class="inp" id="ad-host-search" placeholder="Search host..." style="flex:1;min-width:180px;margin-bottom:0;" oninput="renderAdminHosts()">
+      </div>
+      <div style="overflow-x:auto;"><table id="ad-host-table">
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Mobile</th><th>Org</th><th>Plan</th><th>Quizzes</th><th>Action</th></tr></thead>
+        <tbody id="ad-host-body"></tbody>
+      </table></div>
+    </div>
+    <div id="ad-quizzes" class="ad-panel" style="display:none;">
+      <div style="margin-bottom:1rem;display:flex;gap:.6rem;flex-wrap:wrap;">
+        <input class="inp" id="ad-quiz-search" placeholder="Search quiz..." style="flex:1;min-width:180px;margin-bottom:0;" oninput="renderAdminQuizzes()">
+        <select class="inp" id="ad-quiz-status" style="width:130px;margin-bottom:0;" onchange="renderAdminQuizzes()">
+          <option value="">All Status</option>
+          <option value="live">Live</option>
+          <option value="ended">Ended</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;"><table>
+        <thead><tr><th>#</th><th>Title</th><th>Host</th><th>Mode</th><th>Questions</th><th>Attempts</th><th>Status</th><th>Expires</th><th>Action</th></tr></thead>
+        <tbody id="ad-quiz-body"></tbody>
+      </table></div>
+    </div>
+    <div id="ad-analytics" class="ad-panel" style="display:none;">
+      <div id="ad-analytics-body" style="display:grid;gap:1rem;"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+<script>
+// ══════════════════════════════════════════════
+// CONSTANTS & GLOBALS
+// ══════════════════════════════════════════════
+const SUPER_EMAIL='apexlogic2025@gmail.com';
+const PLANS={
+  free:  {label:'Free',    days:1,  attempts:1,  flash:true,  flashMaxHr:2, analytics:false},
+  paid:  {label:'Paid',    days:7,  attempts:999, flash:true,  flashMaxHr:null,analytics:true},
+  premium:{label:'Premium',days:15, attempts:999, flash:true,  flashMaxHr:null,analytics:true},
+  super: {label:'Super',   days:null,attempts:999,flash:true,  flashMaxHr:null,analytics:true}
+};
+const SHAPES=['🔴','🔵','🟢','🟡'];
+const KEYS=['A','B','C','D'];
+const TAIL_PATTERNS=[
+  /all\s+of\s+the\s+above/i,/all\s+the\s+above/i,/any\s+of\s+the\s+above/i,
+  /none\s+of\s+the\s+above/i,/both\s+a\s+and\s+b/i,/both\s+of\s+the\s+above/i,
+  /neither\s+a\s+nor\s+b/i,/neither\s+of\s+the\s+above/i,
+  /all\s+of\s+above/i,/any\s+of\s+above/i,/none\s+of\s+above/i,
+];
+
+let currentUser=null, currentHostProfile=null;
+let _questions=[], quizMode='normal';
+let currentQuizId=null, currentQuizData=null;
+let participantName='', participantEmail='';
+let attemptAnswers=[], attemptStartTime=0, questionStartTime=0;
+let currentQIdx=0, participantScore=0;
+let quizTimerInt=null, questionTimerInt=null;
+let totalTimeLeft=0, questionTimeLeft=0;
+let _adminHosts={}, _adminQuizzes=[], _adminUnsub=null;
+let selectedOpt=null;
+
+// ══════════════════════════════════════════════
+// FIREBASE HELPERS
+// ══════════════════════════════════════════════
+function dbSet(path,val){return window._set(window._ref(window._db,path),val);}
+function dbGet(path){return window._get(window._ref(window._db,path)).then(s=>s.val());}
+function dbUpd(path,val){return window._update(window._ref(window._db,path),val);}
+function dbOn(path,cb){
+  const r=window._ref(window._db,path);
+  const unsub=window._onValue(r,s=>cb(s.val()));
+  return unsub;
+}
+function dbPush(path,val){return window._push(window._ref(window._db,path),val);}
+
+// ══════════════════════════════════════════════
+// SCREEN NAVIGATION
+// ══════════════════════════════════════════════
+function S(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');el.scrollTop=0;window.scrollTo(0,0);}
+}
+
+// ══════════════════════════════════════════════
+// AUTH HELPERS
+// ══════════════════════════════════════════════
+function authErr(code){
+  const m={
+    'auth/email-already-in-use':'Email already registered.',
+    'auth/invalid-email':'Invalid email address.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/user-not-found':'No account found with this email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/invalid-credential':'Incorrect email or password.',
+    'auth/too-many-requests':'Too many attempts. Please wait.',
+  };
+  return m[code]||'Error: '+code;
+}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+function hideErr(id){document.getElementById(id).style.display='none';}
+function showOk(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+
+function showRegister(){
+  document.getElementById('hl-form').style.display='none';
+  document.getElementById('hl-verify').style.display='none';
+  document.getElementById('hl-register').style.display='block';
+}
+function showLoginForm(){
+  document.getElementById('hl-register').style.display='none';
+  document.getElementById('hl-verify').style.display='none';
+  document.getElementById('hl-form').style.display='block';
+}
+
+// ══════════════════════════════════════════════
+// HOST AUTH
+// ══════════════════════════════════════════════
+async function hostLogin(){
+  const email=document.getElementById('hl-email').value.trim();
+  const pass=document.getElementById('hl-pass').value;
+  hideErr('hl-err');
+  if(!email||!pass){showErr('hl-err','Fill all fields.');return;}
+  try{
+    const cred=await window._signIn(window._auth,email,pass);
+    if(!cred.user.emailVerified&&email!==SUPER_EMAIL){
+      document.getElementById('hl-form').style.display='none';
+      document.getElementById('hl-verify').style.display='block';
+      document.getElementById('verify-msg').textContent='Please verify your email first. Check your inbox.';
+      return;
+    }
+    await afterLogin(cred.user);
+  }catch(e){showErr('hl-err',authErr(e.code));}
+}
+
+async function hostRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const mobile=document.getElementById('r-mobile').value.trim();
+  const city=document.getElementById('r-city').value.trim();
+  const country=document.getElementById('r-country').value.trim();
+  const org=document.getElementById('r-org').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const pass=document.getElementById('r-pass').value;
+  hideErr('r-err');
+  if(!name||!email||!pass){showErr('r-err','Name, email and password are required.');return;}
+  try{
+    const cred=await window._createUser(window._auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    await window._sendVerification(cred.user);
+    // Default plan: free. Admin will upgrade.
+    const profile={uid:cred.user.uid,name,email,mobile,city,country,org,
+      plan:'free',planExpiry:null,registeredAt:new Date().toISOString(),verified:false};
+    await dbSet('hosts/'+cred.user.uid,profile);
+    document.getElementById('hl-register').style.display='none';
+    document.getElementById('hl-verify').style.display='block';
+    document.getElementById('verify-msg').textContent='Verification email sent to '+email+'. Click the link then return here.';
+  }catch(e){showErr('r-err',authErr(e.code));}
+}
+
+async function checkVerification(){
+  hideErr('v-err');hideErr('v-ok');
+  const user=window._auth.currentUser;
+  if(!user){showErr('v-err','Please log in again.');return;}
+  await user.reload();
+  if(user.emailVerified){
+    showOk('v-ok','✅ Verified! Redirecting…');
+    await dbUpd('hosts/'+user.uid,{verified:true});
+    await afterLogin(user);
+  }else{
+    showErr('v-err','Not verified yet. Check your inbox and click the link.');
+  }
+}
+
+async function resendVerification(){
+  try{await window._sendVerification(window._auth.currentUser);showOk('v-ok','Resent! Check your inbox.');}
+  catch(e){showErr('v-err','Could not resend: '+e.message);}
+}
+
+async function afterLogin(user){
+  let p=await dbGet('hosts/'+user.uid);
+  if(!p){
+    p={uid:user.uid,name:user.displayName||user.email,email:user.email,
+       mobile:'',city:'',country:'',org:'',
+       plan:user.email===SUPER_EMAIL?'super':'free',
+       planExpiry:null,registeredAt:new Date().toISOString(),verified:true};
+    await dbSet('hosts/'+user.uid,p);
+  }
+  p.uid   = user.uid;
+  p.email = p.email || user.email;
+  p.name  = p.name  || user.displayName || user.email;
+  p.plan  = p.plan  || 'free';
+  if(!p.verified){await dbUpd('hosts/'+user.uid,{verified:true});p.verified=true;}
+  currentUser=user; currentHostProfile=p;
+  S('host-dashboard'); loadHostDashboard();
+}
+
+async function doSignOut(){
+  try{await window._signOut(window._auth);}catch(e){}
+  currentUser=null;currentHostProfile=null;
+  showLoginForm(); S('landing');
+}
+
+// ══════════════════════════════════════════════
+// HOST DASHBOARD
+// ══════════════════════════════════════════════
+async function loadHostDashboard(){
+  const p=currentHostProfile;
+  if(!p)return;
+  const planInfo=PLANS[p.plan]||PLANS.free;
+  document.getElementById('hd-welcome').textContent='Welcome, '+p.name+'!';
+  document.getElementById('hd-plan-badge').innerHTML=`<span class="badge badge-${p.plan}">${planInfo.label} Plan</span>`;
+
+  const myQRaw=await dbGet('hostQuizzes/'+p.uid);
+  const mine=myQRaw?Object.values(myQRaw):[];
+  mine.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+
+  const live=mine.filter(q=>q.status==='live').length;
+  const total=mine.length;
+  const totalAttempts=mine.reduce((a,q)=>a+(q.attemptCount||0),0);
+
+  document.getElementById('hd-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Total Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">${live}</div><div class="stat-lbl">Live Now</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${totalAttempts}</div><div class="stat-lbl">Total Attempts</div></div>
+  `;
+
+  if(!mine.length){
+    document.getElementById('hd-quizzes').innerHTML=`<div class="card2" style="text-align:center;padding:2rem;color:var(--muted);">No quizzes yet. Create your first quiz! 🚀</div>`;
+    return;
+  }
+  document.getElementById('hd-quizzes').innerHTML=mine.map(q=>{
+    const st=getQuizStatus(q);
+    const exp=q.expiresAt?'Expires '+fmtDate(q.expiresAt):'No expiry';
+    return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:150px;">
+        <div style="font-weight:700;font-size:1rem;">${q.title||'Untitled'}</div>
+        <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem;">${q.questions?q.questions.length:0} Qs · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min · ${exp}</div>
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+        <span class="badge badge-${st}">${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}</span>
+        <span style="font-size:.8rem;color:var(--muted);">${q.attemptCount||0} attempts</span>
+        <button class="btn btn-b btn-sm" onclick="manageQuiz('${q.quizId}')">Manage</button>
+        ${st==='live'?`<button class="btn btn-r btn-sm" onclick="endQuizById('${q.quizId}')">End</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getQuizStatus(q){
+  if(q.status==='ended') return 'ended';
+  if(q.expiresAt&&new Date(q.expiresAt)<new Date()) return 'expired';
+  return 'live';
+}
+
+// ══════════════════════════════════════════════
+// QUIZ SETUP
+// ══════════════════════════════════════════════
+function initSetup(){
+  _questions=[];quizMode='normal';
+  document.getElementById('qs-label').textContent='Click to upload Excel (.xlsx)';
+  document.getElementById('qs-preview').innerHTML='';
+  document.getElementById('qs-title').value='';
+  document.getElementById('qs-desc').value='';
+  document.getElementById('qs-duration').value='30';
+  document.getElementById('qs-negative').value='0';
+  document.getElementById('qs-create').disabled=true;
+  document.getElementById('qs-mode-val').style.display='none';
+  selectMode('normal');
+  // Show flash plan note for free users
+  const isFree=(currentHostProfile?.plan||'free')==='free';
+  document.getElementById('flash-plan-note').style.display=isFree?'block':'none';
+}
+
+function selectMode(mode){
+  quizMode=mode;
+  document.getElementById('mode-normal').style.borderColor=mode==='normal'?'var(--purple)':'#ffffff15';
+  document.getElementById('mode-flash').style.borderColor=mode==='flash'?'var(--gold)':'#ffffff15';
+  const mv=document.getElementById('qs-mode-val');
+  if(mode==='flash'){
+    mv.style.display='block';
+    mv.textContent='⚡ Flash mode: score awarded based on speed. Must submit each question manually.';
+  }else{
+    mv.style.display='none';
+  }
+}
+
+function isTailOption(txt){return TAIL_PATTERNS.some(p=>p.test(txt));}
+
+function loadQuizXL(inp){
+  const file=inp.files[0];if(!file)return;
+  document.getElementById('qs-label').textContent='Loading…';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    _questions=rows.slice(1).filter(r=>r[0]).slice(0,200).map(r=>{
+      const q=String(r[0]).trim();
+      const answer=String(r[5]||'').trim();
+      const score=parseFloat(r[6])||10;
+      const origOpts=[r[1],r[2],r[3],r[4]].map(x=>String(x||'').trim());
+      const normalOpts=origOpts.filter(o=>!isTailOption(o));
+      const tailOpts  =origOpts.filter(o=> isTailOption(o));
+      for(let i=normalOpts.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [normalOpts[i],normalOpts[j]]=[normalOpts[j],normalOpts[i]];
+      }
+      const KL=['A','B','C','D'];
+      const relabeledTail=tailOpts.map(opt=>{
+        let t=opt;
+        t=t.replace(/both\s+a\s+and\s+b/gi,       'Both '+KL[0]+' and '+KL[1]);
+        t=t.replace(/both\s+of\s+the\s+above/gi,   'Both '+KL[0]+' and '+KL[1]);
+        t=t.replace(/neither\s+a\s+nor\s+b/gi,     'Neither '+KL[0]+' nor '+KL[1]);
+        t=t.replace(/neither\s+of\s+the\s+above/gi,'Neither '+KL[0]+' nor '+KL[1]);
+        return t;
+      });
+      const shuffled=[...normalOpts,...relabeledTail];
+      let finalAnswer=answer;
+      tailOpts.forEach((orig,i)=>{
+        if(orig.trim().toLowerCase()===answer.trim().toLowerCase())
+          finalAnswer=relabeledTail[i];
+      });
+      return {q,opts:shuffled,answer:finalAnswer,score};
+    });
+    document.getElementById('qs-label').textContent=`✅ ${_questions.length} questions loaded`;
+    document.getElementById('qs-preview').innerHTML=_questions.slice(0,3).map((q,i)=>`
+      <div style="background:#ffffff08;border-radius:8px;padding:.5rem .9rem;margin-bottom:.4rem;font-size:.82rem;">
+        <strong style="color:var(--gold);">Q${i+1}:</strong> ${q.q.substring(0,70)}
+        <span class="muted"> · ✓ ${q.answer} · ${q.score}pts</span>
+      </div>`).join('')+(_questions.length>3?`<div class="muted" style="text-align:center;font-size:.8rem;">...and ${_questions.length-3} more</div>`:'');
+    document.getElementById('qs-create').disabled=false;
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function createQuiz(){
+  const p=currentHostProfile;if(!p)return;
+  const title=document.getElementById('qs-title').value.trim();
+  const desc=document.getElementById('qs-desc').value.trim();
+  const duration=parseInt(document.getElementById('qs-duration').value)||30;
+  const negative=parseFloat(document.getElementById('qs-negative').value)||0;
+  hideErr('err-setup');
+  if(!title){showErr('err-setup','Please enter a quiz title.');return;}
+  if(!_questions.length){showErr('err-setup','Please upload questions first.');return;}
+
+  const plan=PLANS[p.plan]||PLANS.free;
+  const btn=document.getElementById('qs-create');
+  btn.disabled=true;btn.textContent='Creating…';
+
+  // Validate flash for free plan
+  if(quizMode==='flash'&&p.plan==='free'){
+    // Flash valid for 2 hours only — expiresAt = now + 2hr
+    var expiresAt=new Date(Date.now()+2*60*60*1000).toISOString();
+  }else if(plan.days){
+    var expiresAt=new Date(Date.now()+plan.days*24*60*60*1000).toISOString();
+  }else{
+    var expiresAt=null; // super user — no expiry
+  }
+
+  const hostUid   = p.uid   || (currentUser && currentUser.uid)   || null;
+  const hostName  = p.name  || (currentUser && currentUser.displayName) || (currentUser && currentUser.email) || 'Host';
+  const hostEmail = p.email || (currentUser && currentUser.email) || null;
+  const hostPlan  = p.plan  || 'free';
+  if(!hostUid){
+    showErr('err-setup','Session error — please sign out and sign in again.');
+    btn.disabled=false;btn.textContent='🚀 Create Quiz & Go Live';return;
+  }
+  const quizId=Math.random().toString(36).slice(2,8).toUpperCase();
+  const now=new Date().toISOString();
+  const perQTime=Math.floor((duration*60)/_questions.length);
+  const quiz={
+    quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
+    questions:_questions,hostUid,hostName,hostEmail:hostEmail||'',hostPlan,
+    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0,perQTime,
+  };
+  const quizIdx={
+    quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
+    questionCount:_questions.length,hostUid,hostName,hostEmail:hostEmail||'',hostPlan,
+    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0,
+  };
+  try{
+    await dbSet('quizzes/'+quizId,quiz);
+    await dbSet('hostQuizzes/'+hostUid+'/'+quizId,quizIdx);
+    currentQuizId=quizId;currentQuizData=quiz;
+    btn.disabled=false;btn.textContent='🚀 Create Quiz & Go Live';
+    S('quiz-manage');manageQuiz(quizId);
+  }catch(e){
+    showErr('err-setup','Failed: '+e.message);
+    btn.disabled=false;btn.textContent='🚀 Create Quiz & Go Live';
+  }
+}
+
+// ══════════════════════════════════════════════
+// QUIZ MANAGE (host view)
+// ══════════════════════════════════════════════
+let _qmUnsub=null;
+async function manageQuiz(qid){
+  S('quiz-manage');
+  currentQuizId=qid;
+  if(_qmUnsub){_qmUnsub();_qmUnsub=null;}
+  _qmUnsub=dbOn('quizzes/'+qid,q=>{
+    if(!q)return;
+    currentQuizData=q;
+    const st=getQuizStatus(q);
+    document.getElementById('qm-title').textContent=q.title||'Quiz';
+    document.getElementById('qm-status-badge').innerHTML=`<span class="badge badge-${st}">${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}</span>`;
+    document.getElementById('qm-expiry').textContent=q.expiresAt?'Expires: '+fmtDate(q.expiresAt):'No expiry (Super)';
+    const link=window.location.href.split('?')[0]+'?quiz='+qid;
+    document.getElementById('qm-link').textContent=link;
+    document.getElementById('qm-end-btn').style.display=st==='live'?'':'none';
+    // Stats
+    const attempts=q.attemptCount||0;
+    const scores=q.leaderboard?Object.values(q.leaderboard):[];
+    const avg=scores.length?Math.round(scores.reduce((a,s)=>a+(s.score||0),0)/scores.length):0;
+    document.getElementById('qm-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-num">${attempts}</div><div class="stat-lbl">Attempts</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green);">${scores.length}</div><div class="stat-lbl">Completed</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
+    `;
+    // Leaderboard
+    const lb=scores.sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken);
+    document.getElementById('qm-leaderboard').innerHTML=lb.length?lb.map((e,i)=>{
+      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+      return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
+        <div style="font-size:1.5rem;width:40px;text-align:center;">${medal}</div>
+        <div style="flex:1;"><div style="font-weight:700;">${e.name}</div>
+          <div style="font-size:.78rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)}</div></div>
+        <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">${e.score}</div>
+      </div>`;
+    }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:1.5rem;">No completions yet</div>`;
+  });
+}
+
+function copyQuizLink(){
+  const link=window.location.href.split('?')[0]+'?quiz='+currentQuizId;
+  navigator.clipboard.writeText(link).then(()=>alert('Link copied! Share it with participants.'));
+}
+
+async function endQuizNow(){
+  if(!confirm('End this quiz? Participants will no longer be able to attempt it.'))return;
+  await endQuizById(currentQuizId);
+}
+
+async function endQuizById(qid){
+  const now=new Date().toISOString();
+  await dbUpd('quizzes/'+qid,{status:'ended',endedAt:now});
+  const q=await dbGet('quizzes/'+qid);
+  if(q){
+    if(q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
+    if(PLANS[q.hostPlan||'free'].analytics) await sendAnalyticsEmail(q);
+  }
+  loadHostDashboard();
+}
+
+// ══════════════════════════════════════════════
+// PARTICIPANT — JOIN QUIZ
+// ══════════════════════════════════════════════
+async function joinQuiz(){
+  const code=document.getElementById('tq-code').value.toUpperCase().trim();
+  const name=document.getElementById('tq-name').value.trim();
+  const email=document.getElementById('tq-email').value.trim();
+  const btn=document.getElementById('tq-btn');
+  document.getElementById('tq-err').style.display='none';
+  if(!code||!name){showErr('tq-err','Please enter quiz code and your name.');return;}
+  btn.disabled=true;btn.textContent='Loading…';
+
+  function joinFail(msg){showErr('tq-err',msg);btn.disabled=false;btn.textContent='Start Quiz 🚀';}
+
+  const q=await dbGet('quizzes/'+code);
+  if(!q){joinFail('Quiz not found. Check the code.');return;}
+  if(q.status==='ended'){joinFail('This quiz has ended.');return;}
+  if(q.expiresAt&&new Date(q.expiresAt)<new Date()){
+    await dbUpd('quizzes/'+code,{status:'expired'});
+    joinFail('This quiz has expired.');return;
+  }
+
+  // Check attempt limits
+  const plan=PLANS[q.hostPlan||'free']||PLANS.free;
+  const existingAttempts=q.attempts?Object.values(q.attempts).filter(a=>a.name===name):[];
+  if(plan.attempts===1&&existingAttempts.length>0){
+    joinFail('You have already attempted this quiz. Free plan allows only 1 attempt.');return;
+  }
+
+  currentQuizId=code;currentQuizData=q;
+  participantName=name;participantEmail=email;
+  btn.disabled=false;btn.textContent='Start Quiz 🚀';
+  startAttempt(q);
+}
+
+// ══════════════════════════════════════════════
+// PARTICIPANT — QUIZ ATTEMPT
+// ══════════════════════════════════════════════
+function startAttempt(q){
+  S('quiz-attempt');
+  currentQIdx=0;participantScore=0;selectedOpt=null;
+  attemptAnswers=q.questions.map(()=>({selected:null,correct:false,score:0,timeTaken:0}));
+  attemptStartTime=Date.now();
+  clearInterval(quizTimerInt);clearInterval(questionTimerInt);
+
+  if(q.mode==='normal'){
+    // Total quiz timer
+    totalTimeLeft=q.duration*60;
+    document.getElementById('qa-timer-lbl').textContent='Quiz Time Left';
+    document.getElementById('qa-skip').style.display='';
+    document.getElementById('qa-submit').textContent='Submit Answer ✅';
+    startNormalTimer(q);
+  }else{
+    // Flash: per-question timer
+    document.getElementById('qa-timer-lbl').textContent='Time for this Q';
+    document.getElementById('qa-skip').style.display='none';
+    document.getElementById('qa-submit').textContent='Submit ⚡';
+  }
+  renderQuestion(q);
+}
+
+function startNormalTimer(q){
+  clearInterval(quizTimerInt);
+  quizTimerInt=setInterval(()=>{
+    totalTimeLeft--;
+    document.getElementById('qa-timer').textContent=fmtSec(totalTimeLeft);
+    if(totalTimeLeft<=0){clearInterval(quizTimerInt);autoSubmitQuiz(q);}
+  },1000);
+  document.getElementById('qa-timer').textContent=fmtSec(totalTimeLeft);
+}
+
+function startFlashTimer(q){
+  clearInterval(questionTimerInt);
+  questionTimeLeft=q.perQTime||30;
+  questionStartTime=Date.now();
+  document.getElementById('qa-timer').textContent=fmtSec(questionTimeLeft);
+  questionTimerInt=setInterval(()=>{
+    questionTimeLeft--;
+    document.getElementById('qa-timer').textContent=fmtSec(questionTimeLeft);
+    if(questionTimeLeft<=0){
+      clearInterval(questionTimerInt);
+      showFeedback('⏰ Time up! No answer recorded.',false);
+      attemptAnswers[currentQIdx]={selected:null,correct:false,score:0,
+        timeTaken:q.perQTime,qScore:q.questions[currentQIdx].score};
+      setTimeout(()=>nextQuestion(q),1500);
+    }
+  },1000);
+}
+
+function renderQuestion(q){
+  const qi=q.questions[currentQIdx];
+  const total=q.questions.length;
+  document.getElementById('qa-qnum').textContent=`Q ${currentQIdx+1} / ${total}`;
+  document.getElementById('qa-progress').style.width=((currentQIdx/total)*100)+'%';
+  document.getElementById('qa-mode-lbl').textContent=q.mode==='flash'?'⚡ Flash — submit before time runs out!':'📝 Normal — select and submit';
+  document.getElementById('qa-qtxt').textContent=qi.q;
+  document.getElementById('qa-score-disp').textContent='Score: '+participantScore;
+  document.getElementById('qa-feedback').innerHTML='';
+  selectedOpt=null;
+
+  // Render options
+  document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
+    <button class="opt-btn" id="opt-${i}" onclick="selectOpt(${i})">
+      <span class="q-shape" style="background:${['#FF4757','#1E90FF','#2ED573','#FFA502'][i]}22;color:${['#FF4757','#1E90FF','#2ED573','#FFA502'][i]};">${KEYS[i]}</span>
+      <span>${o}</span>
+    </button>`).join('');
+
+  document.getElementById('qa-submit').disabled=false;
+  if(q.mode==='flash') startFlashTimer(q);
+}
+
+function selectOpt(idx){
+  selectedOpt=idx;
+  document.querySelectorAll('.opt-btn').forEach((b,i)=>{
+    b.classList.toggle('selected',i===idx);
+  });
+}
+
+function submitAnswer(){
+  const q=currentQuizData;
+  const qi=q.questions[currentQIdx];
+  if(selectedOpt===null){
+    document.getElementById('qa-feedback').innerHTML='<span style="color:var(--gold);">Please select an option first.</span>';
+    return;
+  }
+  clearInterval(questionTimerInt);
+  const timeTaken=q.mode==='flash'?(q.perQTime-questionTimeLeft):Math.floor((Date.now()-attemptStartTime)/1000-(q.duration*60-totalTimeLeft-1));
+  const selectedKey=KEYS[selectedOpt];
+  const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
+  const correctText=(qi.answer||'').trim().toLowerCase();
+  const isCorrect=selectedText===correctText;
+
+  // Calculate score
+  let earned=0;
+  if(isCorrect){
+    if(q.mode==='flash'){
+      earned=calcFlashScore(qi.score,timeTaken,q.perQTime);
+    }else{
+      earned=qi.score;
+    }
+  }else if(selectedOpt!==null&&q.negative>0){
+    earned=-q.negative;
+  }
+
+  participantScore+=earned;
+  attemptAnswers[currentQIdx]={
+    selected:selectedKey,correct:isCorrect,score:earned,
+    timeTaken:q.mode==='flash'?timeTaken:0,qScore:qi.score
+  };
+
+  // Show feedback (right or wrong only — no correct answer shown)
+  showFeedback(isCorrect?`✅ Correct! +${earned} pts`:`❌ Wrong! ${earned<0?earned:0} pts`,isCorrect);
+
+  // Disable options after submit
+  document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
+  document.getElementById('qa-submit').disabled=true;
+
+  setTimeout(()=>nextQuestion(q),1500);
+}
+
+function calcFlashScore(maxScore,timeTaken,perQTime){
+  const pct=timeTaken/perQTime;
+  if(pct<=0.25)return maxScore;
+  if(pct<=0.50)return Math.round(maxScore*0.8);
+  if(pct<=0.75)return Math.round(maxScore*0.6);
+  return Math.round(maxScore*0.4);
+}
+
+function skipQuestion(){
+  // Normal mode only — skip records no answer
+  clearInterval(questionTimerInt);
+  attemptAnswers[currentQIdx]={selected:null,correct:false,score:0,timeTaken:0,qScore:currentQuizData.questions[currentQIdx].score};
+  nextQuestion(currentQuizData);
+}
+
+function nextQuestion(q){
+  currentQIdx++;
+  if(currentQIdx>=q.questions.length){
+    finishAttempt(q);
+  }else{
+    renderQuestion(q);
+  }
+}
+
+function autoSubmitQuiz(q){
+  // Normal mode timer ran out — auto-submit with whatever was selected
+  // For current question, record selected answer if any
+  if(selectedOpt!==null&&!attemptAnswers[currentQIdx].selected){
+    const qi=q.questions[currentQIdx];
+    const selectedKey=KEYS[selectedOpt];
+    const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
+    const correctText=(qi.answer||'').trim().toLowerCase();
+    const isCorrect=selectedText===correctText;
+    const earned=isCorrect?qi.score:(q.negative>0?-q.negative:0);
+    participantScore+=earned;
+    attemptAnswers[currentQIdx]={selected:selectedKey,correct:isCorrect,score:earned,timeTaken:0,qScore:qi.score};
+  }
+  // Fill remaining unanswered
+  for(let i=currentQIdx+1;i<q.questions.length;i++){
+    if(!attemptAnswers[i].selected){
+      attemptAnswers[i]={selected:null,correct:false,score:0,timeTaken:0,qScore:q.questions[i].score};
+    }
+  }
+  finishAttempt(q);
+}
+
+async function finishAttempt(q){
+  clearInterval(quizTimerInt);clearInterval(questionTimerInt);
+  const totalTime=Math.floor((Date.now()-attemptStartTime)/1000);
+  const correct=attemptAnswers.filter(a=>a.correct).length;
+  const wrong=attemptAnswers.filter(a=>a.selected&&!a.correct).length;
+  const skipped=attemptAnswers.filter(a=>!a.selected).length;
+
+  // Save attempt to Firebase
+  const attemptId='att_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  const attempt={
+    attemptId,name:participantName,email:participantEmail||null,
+    score:participantScore,correct,wrong,skipped,
+    timeTaken:totalTime,answers:attemptAnswers,
+    completedAt:new Date().toISOString()
+  };
+  try{
+    await dbSet('quizzes/'+q.quizId+'/attempts/'+attemptId,attempt);
+    await dbUpd('quizzes/'+q.quizId,{attemptCount:(q.attemptCount||0)+1});
+    // Update leaderboard — best score per participant
+    const lb=await dbGet('quizzes/'+q.quizId+'/leaderboard');
+    const existing=lb?Object.entries(lb).find(([k,v])=>v.name===participantName):null;
+    const lbEntry={name:participantName,score:participantScore,timeTaken:totalTime,completedAt:new Date().toISOString()};
+    if(!existing||participantScore>existing[1].score||(participantScore===existing[1].score&&totalTime<existing[1].timeTaken)){
+      // New best score
+      const lbKey=existing?existing[0]:'lb_'+Math.random().toString(36).slice(2,8);
+      await dbSet('quizzes/'+q.quizId+'/leaderboard/'+lbKey,lbEntry);
+    }
+  }catch(e){console.error('Save attempt failed:',e);}
+
+  // Show result screen
+  S('quiz-result');
+  document.getElementById('qr-score').textContent=participantScore+' pts';
+  document.getElementById('qr-emoji').textContent=participantScore>0?(correct/q.questions.length>0.7?'🏆':'🎉'):'😔';
+  document.getElementById('qr-subtitle').textContent=q.title;
+  document.getElementById('qr-correct').textContent=correct;
+  document.getElementById('qr-wrong').textContent=wrong;
+  document.getElementById('qr-skipped').textContent=skipped;
+  document.getElementById('qr-time').textContent=fmtSec(totalTime);
+
+  // Summary — show right/wrong but NOT correct answer
+  document.getElementById('qr-summary').innerHTML=attemptAnswers.map((a,i)=>{
+    const qi=q.questions[i];
+    const icon=!a.selected?'⏭':a.correct?'✅':'❌';
+    const col=!a.selected?'var(--muted)':a.correct?'var(--green)':'var(--red)';
+    return `<div style="padding:.6rem .8rem;background:#ffffff08;border-radius:10px;display:flex;gap:.8rem;align-items:center;">
+      <div style="font-size:1.2rem;width:28px;text-align:center;">${icon}</div>
+      <div style="flex:1;">
+        <div style="font-size:.85rem;font-weight:600;color:${col};">Q${i+1}: ${qi.q.substring(0,60)}${qi.q.length>60?'…':''}</div>
+        <div style="font-size:.75rem;color:var(--muted);">
+          ${a.selected?'Your answer: '+a.selected:'Not answered'}
+          ${a.correct?' · +'+a.score+' pts':a.score<0?' · '+a.score+' pts':''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Retake option
+  const plan=PLANS[q.hostPlan||'free']||PLANS.free;
+  document.getElementById('qr-retake').innerHTML=plan.attempts>1
+    ?`<button class="btn btn-p btn-sm" onclick="S('take-quiz');document.getElementById('tq-code').value='${q.quizId}'">🔄 Retake Quiz</button>`
+    :`<div style="color:var(--muted);font-size:.82rem;">Free plan: 1 attempt only</div>`;
+}
+
+// ══════════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════════
+async function loadLeaderboard(qid){
+  S('quiz-leaderboard');
+  const q=await dbGet('quizzes/'+qid);
+  if(!q){document.getElementById('lb-cards').innerHTML='<div class="card2" style="text-align:center;color:var(--muted);">Quiz not found.</div>';return;}
+  document.getElementById('lb-quiz-info').innerHTML=`
+    <div style="font-weight:900;font-size:1.3rem;color:var(--gold);">${q.title}</div>
+    <div style="color:var(--muted);font-size:.85rem;margin-top:.3rem;">${q.questions?q.questions.length:0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
+  `;
+  const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
+  document.getElementById('lb-cards').innerHTML=lb.length?lb.map((e,i)=>{
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const rc=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text)';
+    return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
+      <div style="font-size:${medal?'1.8rem':'1rem'};font-weight:900;color:${rc};width:44px;text-align:center;">${medal||('#'+(i+1))}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;${i<3?'font-size:1.05rem;':''}">${e.name}</div>
+        <div style="font-size:.78rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)} · ${fmtDate(e.completedAt)}</div>
+      </div>
+      <div style="font-size:1.5rem;font-weight:900;color:var(--gold);">${e.score}</div>
+    </div>`;
+  }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No attempts yet. Be the first!</div>`;
+}
+
+// ══════════════════════════════════════════════
+// ANALYTICS EMAIL (stub — logs to Firebase)
+// In production connect to email service
+// ══════════════════════════════════════════════
+async function sendAnalyticsEmail(q){
+  if(!q.attempts)return;
+  const attempts=Object.values(q.attempts);
+  const avgScore=Math.round(attempts.reduce((a,x)=>a+x.score,0)/attempts.length);
+  const perQ=q.questions.map((qi,i)=>{
+    const correct=attempts.filter(a=>a.answers&&a.answers[i]&&a.answers[i].correct).length;
+    return {q:qi.q.substring(0,50),correctPct:Math.round((correct/attempts.length)*100)};
+  });
+  const analyticsData={
+    quizId:q.quizId,title:q.title,hostEmail:q.hostEmail,
+    totalAttempts:attempts.length,avgScore,
+    topPerformers:Object.values(q.leaderboard||{}).sort((a,b)=>b.score-a.score).slice(0,5),
+    perQuestionStats:perQ,
+    generatedAt:new Date().toISOString()
+  };
+  // Save analytics — host can view in dashboard
+  await dbSet('analytics/'+q.quizId,analyticsData);
+}
+
+// ══════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════
+function showAdminLogin(){S('admin-login');}
+
+async function adminLogin(){
+  const email=document.getElementById('al-email').value.trim();
+  const pass=document.getElementById('al-pass').value;
+  hideErr('al-err');
+  try{
+    const cred=await window._signIn(window._auth,email,pass);
+    if(cred.user.email!==SUPER_EMAIL){
+      const flag=await dbGet('admin_flags/'+cred.user.uid+'/isAdmin');
+      if(!flag){showErr('al-err','Not an admin account.');await window._signOut(window._auth);return;}
+    }
+    S('admin-dashboard');loadAdminDashboard();
+  }catch(e){showErr('al-err',authErr(e.code));}
+}
+
+async function adminSignOut(){
+  if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
+  try{await window._signOut(window._auth);}catch(e){}
+  S('landing');
+}
+
+let _adHostsData={}, _adQuizzesData=[];
+
+async function loadAdminDashboard(){
+  // Load hosts with live listener
+  if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
+  // Two parallel live listeners — hosts and hostQuizzes index
+  let _unsubHosts=null, _unsubQuizzes=null;
+  _unsubHosts=dbOn('hosts',hostsData=>{
+    _adHostsData=hostsData||{};
+    renderAdminStats();renderAdminHosts();
+  });
+  _unsubQuizzes=dbOn('hostQuizzes',allHostQ=>{
+    _adQuizzesData=[];
+    if(allHostQ){
+      Object.values(allHostQ).forEach(hostQ=>{
+        if(hostQ&&typeof hostQ==='object')
+          Object.values(hostQ).forEach(q=>{if(q)_adQuizzesData.push(q);});
+      });
+    }
+    renderAdminStats();renderAdminQuizzes();renderAdminAnalytics();
+  });
+  _adminUnsub=()=>{if(_unsubHosts)_unsubHosts();if(_unsubQuizzes)_unsubQuizzes();};
+}
+
+function renderAdminStats(){
+  const hosts=Object.values(_adHostsData);
+  const live=_adQuizzesData.filter(q=>q.status==='live'&&(!q.expiresAt||new Date(q.expiresAt)>new Date())).length;
+  const attempts=_adQuizzesData.reduce((a,q)=>a+(q.attemptCount||0),0);
+  document.getElementById('ad-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${hosts.length}</div><div class="stat-lbl">Total Hosts</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">${live}</div><div class="stat-lbl">Live Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${_adQuizzesData.length}</div><div class="stat-lbl">Total Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${attempts}</div><div class="stat-lbl">Total Attempts</div></div>
+  `;
+}
+
+function adTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['hosts','quizzes','analytics'][i]===name);
+  });
+  document.querySelectorAll('.ad-panel').forEach(p=>p.style.display='none');
+  document.getElementById('ad-'+name).style.display='';
+  if(name==='analytics')renderAdminAnalytics();
+}
+
+function renderAdminHosts(){
+  const search=(document.getElementById('ad-host-search')?.value||'').toLowerCase();
+  const hosts=Object.values(_adHostsData).filter(h=>
+    !search||h.name?.toLowerCase().includes(search)||h.email?.toLowerCase().includes(search)||h.org?.toLowerCase().includes(search)
+  );
+  const qCountByHost={};
+  _adQuizzesData.forEach(q=>{qCountByHost[q.hostUid]=(qCountByHost[q.hostUid]||0)+1;});
+  document.getElementById('ad-host-body').innerHTML=hosts.map((h,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><div style="font-weight:600;">${h.name||'—'}</div><div style="font-size:.75rem;color:var(--muted);">${h.city||''} ${h.country||''}</div></td>
+      <td>${h.email||'—'}</td>
+      <td>${h.mobile||'—'}</td>
+      <td>${h.org||'—'}</td>
+      <td><span class="badge badge-${h.plan||'free'}">${(PLANS[h.plan||'free']||PLANS.free).label}</span></td>
+      <td>${qCountByHost[h.uid]||0}</td>
+      <td>
+        <select class="inp" style="width:110px;padding:.3rem .5rem;font-size:.8rem;margin-bottom:0;" onchange="changePlan('${h.uid}',this.value)">
+          <option value="free"   ${h.plan==='free'   ?'selected':''}>Free</option>
+          <option value="paid"   ${h.plan==='paid'   ?'selected':''}>Paid</option>
+          <option value="premium"${h.plan==='premium'?'selected':''}>Premium</option>
+          <option value="super"  ${h.plan==='super'  ?'selected':''}>Super</option>
+        </select>
+      </td>
+    </tr>`).join('');
+}
+
+async function changePlan(uid,plan){
+  await dbUpd('hosts/'+uid,{plan});
+  if(_adHostsData[uid]) _adHostsData[uid].plan=plan;
+  renderAdminHosts();
+}
+
+function renderAdminQuizzes(){
+  const search=(document.getElementById('ad-quiz-search')?.value||'').toLowerCase();
+  const statusFilter=document.getElementById('ad-quiz-status')?.value||'';
+  let quizzes=_adQuizzesData.filter(q=>{
+    const st=getQuizStatus(q);
+    const matchSearch=!search||q.title?.toLowerCase().includes(search)||q.hostName?.toLowerCase().includes(search);
+    const matchStatus=!statusFilter||st===statusFilter;
+    return matchSearch&&matchStatus;
+  }).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  document.getElementById('ad-quiz-body').innerHTML=quizzes.map((q,i)=>{
+    const st=getQuizStatus(q);
+    return `<tr>
+      <td>${i+1}</td>
+      <td><div style="font-weight:600;">${q.title||'Untitled'}</div><div style="font-size:.72rem;color:var(--gold);">${q.quizId}</div></td>
+      <td><div>${q.hostName||'—'}</div><div style="font-size:.72rem;color:var(--muted);">${q.hostEmail||''}</div></td>
+      <td>${q.mode==='flash'?'⚡ Flash':'📝 Normal'}</td>
+      <td>${q.questions?.length||0}</td>
+      <td>${q.attemptCount||0}</td>
+      <td><span class="badge badge-${st}">${st}</span></td>
+      <td style="font-size:.78rem;">${q.expiresAt?fmtDate(q.expiresAt):'No expiry'}</td>
+      <td>${st==='live'?`<button class="btn btn-r btn-sm" onclick="adminEndQuiz('${q.quizId}')">End</button>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function adminEndQuiz(qid){
+  if(!confirm('End this quiz?'))return;
+  const now=new Date().toISOString();
+  await dbUpd('quizzes/'+qid,{status:'ended',endedAt:now});
+  const q=await dbGet('quizzes/'+qid);
+  if(q&&q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
+}
+
+function renderAdminAnalytics(){
+  const quizzes=_adQuizzesData.filter(q=>q.attemptCount>0).sort((a,b)=>b.attemptCount-a.attemptCount).slice(0,10);
+  document.getElementById('ad-analytics-body').innerHTML=quizzes.length?quizzes.map(q=>{
+    const lb=q.leaderboard?Object.values(q.leaderboard):[];
+    const avg=lb.length?Math.round(lb.reduce((a,e)=>a+e.score,0)/lb.length):0;
+    const st=getQuizStatus(q);
+    return `<div class="card2">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
+        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
+        <div style="display:flex;gap:.8rem;">
+          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">${q.attemptCount||0}</div><div class="stat-lbl">Attempts</div></div>
+          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);">${q.questions?.length||0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
+    </div>`;
+  }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No quiz data yet.</div>`;
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function fmtSec(s){
+  if(!s&&s!==0)return '—';
+  const m=Math.floor(s/60),sec=Math.floor(s%60);
+  return m>0?`${m}m ${sec}s`:`${sec}s`;
+}
+function fmtDate(iso){
+  if(!iso)return '—';
+  try{const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});}
+  catch(e){return iso;}
+}
+function showFeedback(msg,correct){
+  document.getElementById('qa-feedback').innerHTML=`<span style="color:${correct?'var(--green)':'var(--red)'};font-weight:700;font-size:1rem;">${msg}</span>`;
+}
+
+// ══════════════════════════════════════════════
+// PWA — Install as App
+// ══════════════════════════════════════════════
+const manifest={
+  name:'QuizSelf',short_name:'QuizSelf',
+  description:'Self-Paced Quiz Platform',
+  start_url:'./',display:'standalone',
+  background_color:'#0f0f1a',theme_color:'#0f0f1a',
+  icons:[{src:'https://via.placeholder.com/192x192/7c3aed/ffffff?text=QS',sizes:'192x192',type:'image/png'},
+         {src:'https://via.placeholder.com/512x512/7c3aed/ffffff?text=QS',sizes:'512x512',type:'image/png'}]
+};
+const mblob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+const mlink=document.createElement('link');
+mlink.rel='manifest';mlink.href=URL.createObjectURL(mblob);
+document.head.appendChild(mlink);
+
+// Handle direct quiz link (?quiz=CODE)
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(window.location.search);
+  const qcode=params.get('quiz');
+  if(qcode){
+    S('take-quiz');
+    document.getElementById('tq-code').value=qcode.toUpperCase();
+  }
+});
+</script>
