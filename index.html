@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuizSelf">
 <title>QuizSelf — Self-Paced Quiz Platform</title>
+<!-- GOOGLE ADSENSE — Replace ca-pub-XXXXXXXXXXXXXXXX with your Publisher ID after approval -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -140,6 +142,23 @@ select.inp{appearance:none;}
       <button class="btn btn-p" style="font-size:1.1rem;padding:1.1rem;" onclick="S('host-login')">🎓 Host Login</button>
       <button class="btn btn-b" style="font-size:1.1rem;padding:1.1rem;" onclick="S('take-quiz')">📝 Take a Quiz</button>
       <button class="btn btn-k btn-sm" onclick="showAdminLogin()">🔐 Admin</button>
+    </div>
+
+    <!-- AD SLOT 1 — Landing page banner ad (uncomment after AdSense approval) -->
+    <!--
+    <div style="margin:1.5rem auto;max-width:320px;">
+      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+    -->
+
+    <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #ffffff11;font-size:.78rem;color:#666;text-align:center;">
+      <span onclick="S('privacy-policy')" style="cursor:pointer;color:#aaa;text-decoration:underline;">Privacy Policy</span>
+      &nbsp;·&nbsp;
+      <span onclick="S('terms')" style="cursor:pointer;color:#aaa;text-decoration:underline;">Terms of Use</span>
+      &nbsp;·&nbsp;
+      <span style="color:#555;">© 2025 QuizSelf by Apex Logic</span>
     </div>
   </div>
 </div>
@@ -377,6 +396,15 @@ select.inp{appearance:none;}
       <button class="btn btn-k" style="flex:1;" onclick="S('landing')">🏠 Home</button>
     </div>
     <div id="qr-retake" style="margin-top:.8rem;text-align:center;"></div>
+
+    <!-- AD SLOT 2 — Result page ad (uncomment after AdSense approval) -->
+    <!--
+    <div style="margin:1rem 0;">
+      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+    </div>
+    -->
   </div>
 </div>
 
@@ -454,6 +482,121 @@ select.inp{appearance:none;}
     </div>
     <div id="ad-analytics" class="ad-panel" style="display:none;">
       <div id="ad-analytics-body" style="display:grid;gap:1rem;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY -->
+<div id="privacy-policy" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">Privacy Policy</span>
+      <span></span>
+    </div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Privacy Policy</h2>
+      <p style="color:#aaa;margin-bottom:1.2rem;">Last updated: January 2025</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">1. Information We Collect</h3>
+      <p style="margin-bottom:1rem;">We collect the following information when you use QuizSelf:</p>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>Host accounts: Name, email address, mobile number, city, country, organisation</li>
+        <li>Participants: Name and optional email address when joining a quiz</li>
+        <li>Quiz data: Questions, answers, scores, and time taken</li>
+        <li>Usage data: Device type, browser, and general location (country level)</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">2. How We Use Your Information</h3>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>To provide and operate the QuizSelf platform</li>
+        <li>To send quiz analytics reports to hosts (Paid and Premium plans)</li>
+        <li>To improve our services and fix technical issues</li>
+        <li>To display relevant advertisements (Google AdSense)</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">3. Data Storage</h3>
+      <p style="margin-bottom:1rem;">Your data is stored securely on Google Firebase servers. We use Firebase Authentication for secure login and Firebase Realtime Database for quiz data. Google's security standards apply to all stored data.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">4. Cookies and Advertising</h3>
+      <p style="margin-bottom:1rem;">We use Google AdSense to display advertisements. Google may use cookies to show personalised ads based on your browsing history. You can opt out of personalised ads at <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a>.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">5. Third Party Services</h3>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>Google Firebase — authentication and database</li>
+        <li>Google AdSense — advertisements</li>
+        <li>Netlify — website hosting</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">6. Data Sharing</h3>
+      <p style="margin-bottom:1rem;">We do not sell your personal data to any third party. Quiz results are visible only to the host who created the quiz and the admin. Participant names appear on the leaderboard of the quiz they attempted.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">7. Data Deletion</h3>
+      <p style="margin-bottom:1rem;">Host accounts can be deleted by contacting us at apexlogic2025@gmail.com. Participant data is automatically removed when a quiz is deleted by the host.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">8. Children's Privacy</h3>
+      <p style="margin-bottom:1rem;">QuizSelf may be used by students of all ages under the supervision of a teacher or institution. We do not knowingly collect personal data from children under 13 without parental consent.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">9. Contact Us</h3>
+      <p style="margin-bottom:1rem;">For any privacy concerns or data requests, contact us at:<br>
+      <a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:#ffffff08;border-radius:12px;font-size:.82rem;color:#888;">
+        This privacy policy applies to the QuizSelf web application hosted at quiz-self.netlify.app and operated by Apex Logic.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS OF USE -->
+<div id="terms" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">Terms of Use</span>
+      <span></span>
+    </div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Terms of Use</h2>
+      <p style="color:#aaa;margin-bottom:1.2rem;">Last updated: January 2025</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">1. Acceptance of Terms</h3>
+      <p style="margin-bottom:1rem;">By using QuizSelf you agree to these terms. If you do not agree, please do not use the platform.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">2. Host Responsibilities</h3>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>Hosts are responsible for the content of their quizzes</li>
+        <li>Quiz content must not be offensive, illegal, or violate copyright</li>
+        <li>Hosts must not share their login credentials with others</li>
+        <li>Free plan is limited to 1 day quiz duration and 1 attempt per participant</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">3. Participant Responsibilities</h3>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>Participants must attempt quizzes honestly and independently</li>
+        <li>Sharing quiz questions or answers externally is not permitted</li>
+        <li>Each participant is responsible for their own account and PIN</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">4. Plan Limitations</h3>
+      <ul style="margin-left:1.2rem;margin-bottom:1rem;">
+        <li>Free plan: 1 day quiz duration, 1 attempt per participant</li>
+        <li>Paid plan: 7 days quiz duration, unlimited attempts</li>
+        <li>Premium plan: 15 days quiz duration, unlimited attempts, analytics</li>
+        <li>Super plan: No expiry, unlimited attempts, full analytics</li>
+      </ul>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">5. Advertisements</h3>
+      <p style="margin-bottom:1rem;">QuizSelf displays advertisements via Google AdSense on free accounts. Paid and Premium accounts may have reduced or no advertisements.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">6. Limitation of Liability</h3>
+      <p style="margin-bottom:1rem;">QuizSelf is provided as-is. We are not liable for any loss of data, incorrect scores, or service interruptions. Quiz results are for educational purposes only.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">7. Changes to Terms</h3>
+      <p style="margin-bottom:1rem;">We may update these terms at any time. Continued use of QuizSelf after changes means you accept the new terms.</p>
+
+      <h3 style="color:#fff;margin-bottom:.5rem;">8. Contact</h3>
+      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
     </div>
   </div>
 </div>
@@ -1202,25 +1345,16 @@ async function adminLogin(){
   const email=document.getElementById('al-email').value.trim();
   const pass=document.getElementById('al-pass').value;
   hideErr('al-err');
-  if(!email||!pass){showErr('al-err','Enter email and password.');return;}
-  // Set flag BEFORE signIn so onAuthStateChanged cannot redirect to host dashboard
-  window._adminSessionActive=true;
   try{
     const cred=await window._signIn(window._auth,email,pass);
     if(cred.user.email!==SUPER_EMAIL){
       const flag=await dbGet('admin_flags/'+cred.user.uid+'/isAdmin');
-      if(!flag){
-        showErr('al-err','Not an admin account.');
-        window._adminSessionActive=false;
-        await window._signOut(window._auth);
-        return;
-      }
+      if(!flag){showErr('al-err','Not an admin account.');await window._signOut(window._auth);return;}
     }
+    // Mark admin session so onAuthStateChanged does not redirect to host dashboard
+    window._adminSessionActive=true;
     S('admin-dashboard');loadAdminDashboard();
-  }catch(e){
-    window._adminSessionActive=false;
-    showErr('al-err',authErr(e.code));
-  }
+  }catch(e){showErr('al-err',authErr(e.code));}
 }
 
 async function adminSignOut(){
