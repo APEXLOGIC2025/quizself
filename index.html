@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuizSelf">
 <title>QuizSelf — Self-Paced Quiz Platform</title>
-<!-- GOOGLE ADSENSE — Replace ca-pub-XXXXXXXXXXXXXXXX with your Publisher ID after approval -->
-<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<!-- GOOGLE ADSENSE -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6461655458619662" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -147,7 +147,7 @@ select.inp{appearance:none;}
     <!-- AD SLOT 1 — Landing page banner ad (uncomment after AdSense approval) -->
     <!--
     <div style="margin:1.5rem auto;max-width:320px;">
-      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
         data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
     </div>
@@ -400,7 +400,7 @@ select.inp{appearance:none;}
     <!-- AD SLOT 2 — Result page ad (uncomment after AdSense approval) -->
     <!--
     <div style="margin:1rem 0;">
-      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
         data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
     </div>
@@ -532,14 +532,14 @@ select.inp{appearance:none;}
       <p style="margin-bottom:1rem;">We do not sell your personal data to any third party. Quiz results are visible only to the host who created the quiz and the admin. Participant names appear on the leaderboard of the quiz they attempted.</p>
 
       <h3 style="color:#fff;margin-bottom:.5rem;">7. Data Deletion</h3>
-      <p style="margin-bottom:1rem;">Host accounts can be deleted by contacting us at apexlogic2025@gmail.com. Participant data is automatically removed when a quiz is deleted by the host.</p>
+      <p style="margin-bottom:1rem;">Host accounts can be deleted by contacting us at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0968796c7165666e606a3b393b3c496e64686065276a6664">[email&#160;protected]</a>. Participant data is automatically removed when a quiz is deleted by the host.</p>
 
       <h3 style="color:#fff;margin-bottom:.5rem;">8. Children's Privacy</h3>
       <p style="margin-bottom:1rem;">QuizSelf may be used by students of all ages under the supervision of a teacher or institution. We do not knowingly collect personal data from children under 13 without parental consent.</p>
 
       <h3 style="color:#fff;margin-bottom:.5rem;">9. Contact Us</h3>
       <p style="margin-bottom:1rem;">For any privacy concerns or data requests, contact us at:<br>
-      <a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+      <a href="/cdn-cgi/l/email-protection#a7c6d7c2dfcbc8c0cec495979592e7c0cac6cecb89c4c8ca" style="color:var(--gold);"><span class="__cf_email__" data-cfemail="95f4e5f0edf9faf2fcf6a7a5a7a0d5f2f8f4fcf9bbf6faf8">[email&#160;protected]</span></a></p>
 
       <div style="margin-top:1.5rem;padding:1rem;background:#ffffff08;border-radius:12px;font-size:.82rem;color:#888;">
         This privacy policy applies to the QuizSelf web application hosted at quiz-self.netlify.app and operated by Apex Logic.
@@ -596,12 +596,12 @@ select.inp{appearance:none;}
       <p style="margin-bottom:1rem;">We may update these terms at any time. Continued use of QuizSelf after changes means you accept the new terms.</p>
 
       <h3 style="color:#fff;margin-bottom:.5rem;">8. Contact</h3>
-      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+      <p><a href="/cdn-cgi/l/email-protection#325342574a5e5d555b510002000772555f535b5e1c515d5f" style="color:var(--gold);"><span class="__cf_email__" data-cfemail="3c5d4c594450535b555f0e0c0e097c5b515d5550125f5351">[email&#160;protected]</span></a></p>
     </div>
   </div>
 </div>
 
-</body>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>
 <script>
 // ══════════════════════════════════════════════
@@ -1513,20 +1513,4 @@ const manifest={
   start_url:'./',display:'standalone',
   background_color:'#0f0f1a',theme_color:'#0f0f1a',
   icons:[{src:'https://via.placeholder.com/192x192/7c3aed/ffffff?text=QS',sizes:'192x192',type:'image/png'},
-         {src:'https://via.placeholder.com/512x512/7c3aed/ffffff?text=QS',sizes:'512x512',type:'image/png'}]
-};
-const mblob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-const mlink=document.createElement('link');
-mlink.rel='manifest';mlink.href=URL.createObjectURL(mblob);
-document.head.appendChild(mlink);
-
-// Handle direct quiz link (?quiz=CODE)
-window.addEventListener('load',()=>{
-  const params=new URLSearchParams(window.location.search);
-  const qcode=params.get('quiz');
-  if(qcode){
-    S('take-quiz');
-    document.getElementById('tq-code').value=qcode.toUpperCase();
-  }
-});
-</script>
+         {src:'https://via.placeholder.com/512x512/7c3aed/ffffff?text=QS',sizes:'512x512',type:'image/pn
