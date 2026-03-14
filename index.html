@@ -1202,16 +1202,25 @@ async function adminLogin(){
   const email=document.getElementById('al-email').value.trim();
   const pass=document.getElementById('al-pass').value;
   hideErr('al-err');
+  if(!email||!pass){showErr('al-err','Enter email and password.');return;}
+  // Set flag BEFORE signIn so onAuthStateChanged cannot redirect to host dashboard
+  window._adminSessionActive=true;
   try{
     const cred=await window._signIn(window._auth,email,pass);
     if(cred.user.email!==SUPER_EMAIL){
       const flag=await dbGet('admin_flags/'+cred.user.uid+'/isAdmin');
-      if(!flag){showErr('al-err','Not an admin account.');await window._signOut(window._auth);return;}
+      if(!flag){
+        showErr('al-err','Not an admin account.');
+        window._adminSessionActive=false;
+        await window._signOut(window._auth);
+        return;
+      }
     }
-    // Mark admin session so onAuthStateChanged does not redirect to host dashboard
-    window._adminSessionActive=true;
     S('admin-dashboard');loadAdminDashboard();
-  }catch(e){showErr('al-err',authErr(e.code));}
+  }catch(e){
+    window._adminSessionActive=false;
+    showErr('al-err',authErr(e.code));
+  }
 }
 
 async function adminSignOut(){
