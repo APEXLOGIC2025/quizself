@@ -46,21 +46,18 @@
   // Auto-restore session
   onAuthStateChanged(auth, async user=>{
     if(user){
-      // Check if super/admin
-      if(user.email===SUPER_EMAIL){
-        currentUser=user;
-        const p=await dbGet('hosts/'+user.uid);
-        const superProf=p||{uid:user.uid,email:user.email,name:'Super Admin',plan:'super',planExpiry:null};
-        superProf.uid=user.uid;
-        superProf.email=superProf.email||user.email;
-        superProf.plan=superProf.plan||'super';
-        currentHostProfile=superProf;
-        if(!p) await dbSet('hosts/'+user.uid,superProf);
-        S('host-dashboard'); loadHostDashboard();
-        return;
-      }
+      // If admin session is active — do NOT redirect to host dashboard
+      if(window._adminSessionActive) return;
+      // Auto-restore host session only
       const p=await dbGet('hosts/'+user.uid);
-      if(p){currentUser=user;currentHostProfile=p;S('host-dashboard');loadHostDashboard();}
+      if(p&&!p.plan){p.plan='free';}
+      if(p){
+        p.uid=user.uid;
+        p.email=p.email||user.email;
+        p.name=p.name||user.displayName||user.email;
+        currentUser=user;currentHostProfile=p;
+        S('host-dashboard');loadHostDashboard();
+      }
     }
   });
 </script>
@@ -1211,11 +1208,14 @@ async function adminLogin(){
       const flag=await dbGet('admin_flags/'+cred.user.uid+'/isAdmin');
       if(!flag){showErr('al-err','Not an admin account.');await window._signOut(window._auth);return;}
     }
+    // Mark admin session so onAuthStateChanged does not redirect to host dashboard
+    window._adminSessionActive=true;
     S('admin-dashboard');loadAdminDashboard();
   }catch(e){showErr('al-err',authErr(e.code));}
 }
 
 async function adminSignOut(){
+  window._adminSessionActive=false;
   if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
   try{await window._signOut(window._auth);}catch(e){}
   S('landing');
