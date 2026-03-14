@@ -51,9 +51,9 @@
         currentUser=user;
         const p=await dbGet('hosts/'+user.uid);
         const superProf=p||{uid:user.uid,email:user.email,name:'Super Admin',plan:'super',planExpiry:null};
-        superProf.uid   = user.uid;
-        superProf.email = superProf.email || user.email;
-        superProf.plan  = superProf.plan  || 'super';
+        superProf.uid=user.uid;
+        superProf.email=superProf.email||user.email;
+        superProf.plan=superProf.plan||'super';
         currentHostProfile=superProf;
         if(!p) await dbSet('hosts/'+user.uid,superProf);
         S('host-dashboard'); loadHostDashboard();
@@ -733,7 +733,7 @@ function loadQuizXL(inp){
       const score=parseFloat(r[6])||10;
       const origOpts=[r[1],r[2],r[3],r[4]].map(x=>String(x||'').trim());
       const normalOpts=origOpts.filter(o=>!isTailOption(o));
-      const tailOpts  =origOpts.filter(o=> isTailOption(o));
+      const tailOpts=origOpts.filter(o=>isTailOption(o));
       for(let i=normalOpts.length-1;i>0;i--){
         const j=Math.floor(Math.random()*(i+1));
         [normalOpts[i],normalOpts[j]]=[normalOpts[j],normalOpts[i]];
@@ -790,27 +790,20 @@ async function createQuiz(){
     var expiresAt=null; // super user — no expiry
   }
 
-  const hostUid   = p.uid   || (currentUser && currentUser.uid)   || null;
-  const hostName  = p.name  || (currentUser && currentUser.displayName) || (currentUser && currentUser.email) || 'Host';
-  const hostEmail = p.email || (currentUser && currentUser.email) || null;
+  const hostUid   = p.uid   || (currentUser&&currentUser.uid)   || null;
+  const hostName  = p.name  || (currentUser&&currentUser.displayName) || (currentUser&&currentUser.email) || 'Host';
+  const hostEmail = p.email || (currentUser&&currentUser.email) || '';
   const hostPlan  = p.plan  || 'free';
-  if(!hostUid){
-    showErr('err-setup','Session error — please sign out and sign in again.');
-    btn.disabled=false;btn.textContent='🚀 Create Quiz & Go Live';return;
-  }
+  if(!hostUid){showErr('err-setup','Session error — sign out and sign in again.');btn.disabled=false;btn.textContent='🚀 Create Quiz & Go Live';return;}
   const quizId=Math.random().toString(36).slice(2,8).toUpperCase();
   const now=new Date().toISOString();
   const perQTime=Math.floor((duration*60)/_questions.length);
-  const quiz={
-    quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
-    questions:_questions,hostUid,hostName,hostEmail:hostEmail||'',hostPlan,
-    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0,perQTime,
-  };
-  const quizIdx={
-    quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
-    questionCount:_questions.length,hostUid,hostName,hostEmail:hostEmail||'',hostPlan,
-    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0,
-  };
+  const quiz={quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
+    questions:_questions,hostUid,hostName,hostEmail,hostPlan,
+    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0,perQTime};
+  const quizIdx={quizId,title,desc:desc||'',duration,negative:negative||0,mode:quizMode,
+    questionCount:_questions.length,hostUid,hostName,hostEmail,hostPlan,
+    status:'live',createdAt:now,expiresAt:expiresAt||null,attemptCount:0};
   try{
     await dbSet('quizzes/'+quizId,quiz);
     await dbSet('hostQuizzes/'+hostUid+'/'+quizId,quizIdx);
@@ -1231,15 +1224,9 @@ async function adminSignOut(){
 let _adHostsData={}, _adQuizzesData=[];
 
 async function loadAdminDashboard(){
-  // Load hosts with live listener
+  _adHostsData=await dbGet('hosts')||{};
   if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
-  // Two parallel live listeners — hosts and hostQuizzes index
-  let _unsubHosts=null, _unsubQuizzes=null;
-  _unsubHosts=dbOn('hosts',hostsData=>{
-    _adHostsData=hostsData||{};
-    renderAdminStats();renderAdminHosts();
-  });
-  _unsubQuizzes=dbOn('hostQuizzes',allHostQ=>{
+  _adminUnsub=dbOn('hostQuizzes',allHostQ=>{
     _adQuizzesData=[];
     if(allHostQ){
       Object.values(allHostQ).forEach(hostQ=>{
@@ -1247,9 +1234,8 @@ async function loadAdminDashboard(){
           Object.values(hostQ).forEach(q=>{if(q)_adQuizzesData.push(q);});
       });
     }
-    renderAdminStats();renderAdminQuizzes();renderAdminAnalytics();
+    renderAdminStats();renderAdminHosts();renderAdminQuizzes();renderAdminAnalytics();
   });
-  _adminUnsub=()=>{if(_unsubHosts)_unsubHosts();if(_unsubQuizzes)_unsubQuizzes();};
 }
 
 function renderAdminStats(){
@@ -1302,7 +1288,7 @@ function renderAdminHosts(){
 
 async function changePlan(uid,plan){
   await dbUpd('hosts/'+uid,{plan});
-  if(_adHostsData[uid]) _adHostsData[uid].plan=plan;
+  _adHostsData[uid].plan=plan;
   renderAdminHosts();
 }
 
