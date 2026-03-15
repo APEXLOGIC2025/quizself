@@ -617,8 +617,6 @@ select.inp{appearance:none;}
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
-</html>
 <script>
 // ══════════════════════════════════════════════
 // CONSTANTS & GLOBALS
@@ -1654,12 +1652,131 @@ function showFeedback(msg,correct){
 }
 
 // ══════════════════════════════════════════════
-// PWA — Install as App
+// PWA — Full Setup
 // ══════════════════════════════════════════════
-const manifest={
-  name:'QuizSelf',short_name:'QuizSelf',
-  description:'Self-Paced Quiz Platform',
-  start_url:'./',display:'standalone',
-  background_color:'#0f0f1a',theme_color:'#0f0f1a',
-  icons:[{src:'https://via.placeholder.com/192x192/7c3aed/ffffff?text=QS',sizes:'192x192',type:'image/png'},
-         {src:'https://via.placeholder.com/512x512/7c3aed/ffffff?text=QS',sizes:'512x512',type:'image/pn
+const _iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#c026d3"/></linearGradient></defs><rect width="512" height="512" rx="80" fill="url(#g)"/><text x="256" y="360" font-size="300" text-anchor="middle">🧠</text></svg>`;
+const _iconUrl='data:image/svg+xml;base64,'+btoa(_iconSvg);
+const _manifest={
+  name:'QuizSelf — Self-Paced Quiz',short_name:'QuizSelf',
+  description:'Create and attempt self-paced quizzes. Normal and Flash modes.',
+  start_url:'./',scope:'./',display:'standalone',orientation:'portrait-primary',
+  background_color:'#0f0f1a',theme_color:'#7c3aed',categories:['education'],
+  icons:[
+    {src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any'},
+    {src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any'},
+    {src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'maskable'},
+    {src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}
+  ]
+};
+const _mblob=new Blob([JSON.stringify(_manifest)],{type:'application/manifest+json'});
+const _mlink=document.createElement('link');
+_mlink.rel='manifest';_mlink.href=URL.createObjectURL(_mblob);
+document.head.appendChild(_mlink);
+
+if('serviceWorker' in navigator){
+  const swCode=`const CACHE='quizself-v2';self.addEventListener('install',e=>{self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).catch(()=>caches.match('/')));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:'application/javascript'}))).catch(()=>{});
+}
+
+let _installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();_installPrompt=e;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='';
+  setTimeout(showInstallBanner,3000);
+});
+window.addEventListener('appinstalled',()=>{
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='none';
+  dismissBanner();_installPrompt=null;
+});
+
+function showInstallBanner(){
+  if(!_installPrompt||document.getElementById('pwa-banner'))return;
+  const b=document.createElement('div');b.id='pwa-banner';
+  b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1a2e,#16213e);border-top:2px solid #7c3aed;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;z-index:9999;box-shadow:0 -4px 20px #0008;';
+  b.innerHTML=`<div style="font-size:2rem;">🧠</div><div style="flex:1;"><div style="font-weight:700;color:#FFD700;font-size:.95rem;">Install QuizSelf App</div><div style="color:#aaa;font-size:.78rem;">Add to home screen for quick access</div></div><button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);border:none;color:#fff;padding:.6rem 1.2rem;border-radius:50px;font-weight:700;cursor:pointer;font-size:.9rem;">Install</button><button onclick="dismissBanner()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2rem;padding:.3rem;">✕</button>`;
+  document.body.appendChild(b);
+}
+async function installApp(){
+  if(!_installPrompt)return;
+  _installPrompt.prompt();
+  const r=await _installPrompt.userChoice;
+  if(r.outcome==='accepted')dismissBanner();
+  _installPrompt=null;
+}
+function dismissBanner(){const b=document.getElementById('pwa-banner');if(b)b.remove();}
+
+function showiOSInstall(){
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS&&!window.navigator.standalone){
+    setTimeout(()=>{
+      if(document.getElementById('pwa-banner'))return;
+      const b=document.createElement('div');b.id='pwa-banner';
+      b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1a2e,#16213e);border-top:2px solid #7c3aed;padding:1rem 1.2rem;z-index:9999;';
+      b.innerHTML=`<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem;"><div style="font-size:1.8rem;">🧠</div><div style="font-weight:700;color:#FFD700;">Install QuizSelf on iPhone</div><button onclick="dismissBanner()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2rem;margin-left:auto;">✕</button></div><div style="color:#ccc;font-size:.82rem;">Tap Share ⬆️ then <strong>Add to Home Screen</strong> 📲</div>`;
+      document.body.appendChild(b);
+    },3000);
+  }
+}
+
+const _style=document.createElement('style');
+_style.textContent='@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}';
+document.head.appendChild(_style);
+
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(window.location.search);
+  const qcode=params.get('quiz');
+  if(qcode){S('take-quiz');document.getElementById('tq-code').value=qcode.toUpperCase();}
+  showiOSInstall();
+});
+</script>
+
+<!-- PRIVACY POLICY -->
+<div id="privacy-policy" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">Privacy Policy</span><span></span>
+    </div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Privacy Policy</h2>
+      <p style="color:#aaa;margin-bottom:1.2rem;">Last updated: January 2025</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">1. Information We Collect</h3>
+      <p style="margin-bottom:1rem;">We collect name, email, mobile, city, country and organisation from hosts. Participants provide name and optional email. Quiz data including scores and time taken is stored.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">2. How We Use Your Information</h3>
+      <p style="margin-bottom:1rem;">To operate the QuizSelf platform, send analytics to hosts, improve services, and display relevant advertisements via Google AdSense.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">3. Data Storage</h3>
+      <p style="margin-bottom:1rem;">Data is stored on Google Firebase servers with Firebase Authentication for secure login.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">4. Cookies and Advertising</h3>
+      <p style="margin-bottom:1rem;">We use Google AdSense which may use cookies for personalised ads. Opt out at <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a>.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">5. Contact</h3>
+      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS OF USE -->
+<div id="terms" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back</button>
+      <span class="gold" style="font-weight:800;">Terms of Use</span><span></span>
+    </div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Terms of Use</h2>
+      <p style="color:#aaa;margin-bottom:1.2rem;">Last updated: January 2025</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">1. Acceptance</h3>
+      <p style="margin-bottom:1rem;">By using QuizSelf you agree to these terms.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">2. Host Responsibilities</h3>
+      <p style="margin-bottom:1rem;">Hosts are responsible for quiz content. Free plan: 1 day, 1 attempt. Paid: 7 days. Premium: 15 days. Super: no expiry.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">3. Advertisements</h3>
+      <p style="margin-bottom:1rem;">QuizSelf displays ads via Google AdSense on free accounts.</p>
+      <h3 style="color:#fff;margin-bottom:.5rem;">4. Contact</h3>
+      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
