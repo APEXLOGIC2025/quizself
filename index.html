@@ -617,8 +617,6 @@ select.inp{appearance:none;}
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
-</html>
 <script>
 // ══════════════════════════════════════════════
 // CONSTANTS & GLOBALS
@@ -1103,7 +1101,7 @@ async function joinQuiz(){
 // ══════════════════════════════════════════════
 function startAttempt(q){
   S('quiz-attempt');
-  currentQIdx=0;participantScore=0;selectedOpt=null;selectedOpts=[];
+  currentQIdx=0;participantScore=0;selectedOpt=null;
   attemptAnswers=q.questions.map(()=>({selected:null,correct:false,score:0,timeTaken:0}));
   attemptStartTime=Date.now();
   clearInterval(quizTimerInt);clearInterval(questionTimerInt);
@@ -1164,20 +1162,30 @@ function renderQuestion(q){
   selectedOpts=[];
 
   const OPT_COLORS=['#FF4757','#1E90FF','#2ED573','#FFA502'];
+  const isMulti=qi.isMulti||false;
+  const correctCount=isMulti?(qi.correctTexts||[]).length:1;
 
-  // Mode label — never reveal how many correct answers
-  const modeLbl=q.mode==='flash'?'⚡ Flash — submit before time runs out!':'📝 Normal — select all correct options and submit';
+  // Mode label
+  let modeLbl=q.mode==='flash'?'⚡ Flash — submit before time runs out!':'📝 Normal — select and submit';
+  if(isMulti) modeLbl+=` &nbsp;·&nbsp; <span style="color:#FFD700;font-weight:700;">☑ Select ${correctCount} correct option${correctCount>1?'s':''}</span>`;
   document.getElementById('qa-mode-lbl').innerHTML=modeLbl;
 
-  // Always show checkboxes — same UI for single and multi answer
-  // Participant decides how many to select based on knowledge, not UI hints
-  selectedOpts=[];
-  document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
-    <button class="opt-btn" id="opt-${i}" onclick="toggleOpt(${i})">
-      <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
-      <span style="flex:1;text-align:left;">${o}</span>
-      <span id="chk-${i}" style="font-size:1.2rem;margin-left:.5rem;color:#aaa;">☐</span>
-    </button>`).join('');
+  if(isMulti){
+    // Checkbox style — multiple selection
+    document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
+      <button class="opt-btn" id="opt-${i}" onclick="toggleOpt(${i})" style="position:relative;">
+        <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
+        <span style="flex:1;text-align:left;">${o}</span>
+        <span id="chk-${i}" style="font-size:1.3rem;margin-left:.5rem;">☐</span>
+      </button>`).join('');
+  }else{
+    // Single selection
+    document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
+      <button class="opt-btn" id="opt-${i}" onclick="selectOpt(${i})">
+        <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
+        <span style="flex:1;text-align:left;">${o}</span>
+      </button>`).join('');
+  }
 
   document.getElementById('qa-submit').disabled=false;
   if(q.mode==='flash') startFlashTimer(q);
@@ -1191,20 +1199,19 @@ function selectOpt(idx){
 }
 
 function toggleOpt(idx){
+  // Multi-answer checkbox toggle
   const pos=selectedOpts.indexOf(idx);
   if(pos>=0){
     selectedOpts.splice(pos,1);
   }else{
     selectedOpts.push(idx);
   }
+  // Update visual state
   document.querySelectorAll('.opt-btn').forEach((b,i)=>{
     const chk=document.getElementById('chk-'+i);
     const on=selectedOpts.includes(i);
     b.classList.toggle('selected',on);
-    if(chk){
-      chk.textContent=on?'☑':'☐';
-      chk.style.color=on?'#FFD700':'#aaa';
-    }
+    if(chk)chk.textContent=on?'☑':'☐';
   });
 }
 
@@ -1213,10 +1220,17 @@ function submitAnswer(){
   const qi=q.questions[currentQIdx];
   const isMulti=qi.isMulti||false;
 
-  // Validate — always use selectedOpts (checkbox mode for all questions)
-  if(selectedOpts.length===0){
-    document.getElementById('qa-feedback').innerHTML='<span style="color:var(--gold);">Please select at least one option.</span>';
-    return;
+  // Validate selection
+  if(isMulti){
+    if(selectedOpts.length===0){
+      document.getElementById('qa-feedback').innerHTML='<span style="color:var(--gold);">Please select at least one option.</span>';
+      return;
+    }
+  }else{
+    if(selectedOpt===null){
+      document.getElementById('qa-feedback').innerHTML='<span style="color:var(--gold);">Please select an option first.</span>';
+      return;
+    }
   }
 
   clearInterval(questionTimerInt);
@@ -1226,34 +1240,49 @@ function submitAnswer(){
   let isCorrect=false;
   let selectedKey='';
 
-  // Unified scoring — works for both single and multi answer
-  // Single answer: selectedOpts=[1 item], correctTexts=[1 item]
-  // Multi answer:  selectedOpts=[n items], correctTexts=[n items]
-  {
+  if(isMulti){
+    // Get selected option texts
     const selTexts=selectedOpts.map(i=>(qi.opts[i]||'').trim().toLowerCase());
-    const corrTexts=(qi.correctTexts||(qi.answer?[qi.answer]:[])).map(t=>t.trim().toLowerCase());
-    const totalCorrect=corrTexts.length||1;
+    const corrTexts=(qi.correctTexts||[]).map(t=>t.trim().toLowerCase());
+    const totalCorrect=corrTexts.length;
+
+    // Count how many selected are correct and how many are wrong
     const correctSelected=selTexts.filter(t=>corrTexts.includes(t)).length;
     const wrongSelected=selTexts.filter(t=>!corrTexts.includes(t)).length;
 
     selectedKey=selectedOpts.map(i=>KEYS[i]).join(',');
     isCorrect=(correctSelected===totalCorrect&&wrongSelected===0);
+
     const negDeduct=Math.round(qi.score*negPct*10)/10;
 
-    if(q.scoreMode==='all'||!qi.isMulti){
-      // All or Nothing (default for single answer too)
+    if(q.scoreMode==='all'){
+      // All or Nothing
       if(isCorrect){
         earned=q.mode==='flash'?calcFlashScore(qi.score,timeTaken,q.perQTime):qi.score;
       }else if(wrongSelected>0){
-        earned=-negDeduct;
+        earned=-negDeduct; // selected a wrong option
       }else{
-        earned=0; // partial correct, no wrong
+        earned=0; // partial correct but no wrong — still 0
       }
     }else{
-      // Pro-rata — only for explicitly multi-answer questions
+      // Pro-rata — marks per correct option selected
       const perOptScore=qi.score/totalCorrect;
       earned=Math.round(correctSelected*perOptScore*10)/10;
       if(wrongSelected>0) earned=Math.round((earned-negDeduct)*10)/10;
+    }
+
+  }else{
+    // Single answer
+    const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
+    const corrTexts=(qi.correctTexts||[(qi.answer||'')]).map(t=>t.trim().toLowerCase());
+    isCorrect=corrTexts.includes(selectedText);
+    selectedKey=KEYS[selectedOpt];
+    const negDeduct=Math.round(qi.score*negPct*10)/10;
+
+    if(isCorrect){
+      earned=q.mode==='flash'?calcFlashScore(qi.score,timeTaken,q.perQTime):qi.score;
+    }else if(negPct>0){
+      earned=-negDeduct;
     }
   }
 
@@ -1324,19 +1353,14 @@ function autoSubmitQuiz(q){
     }else{
       attemptAnswers[currentQIdx]={selected:null,correct:false,score:0,timeTaken:0,qScore:qi.score,isMulti:true};
     }
-  }else if(selectedOpts.length>0&&!attemptAnswers[currentQIdx].selected){
-    // Treat as multi path even for single answer questions
-    const selTexts=selectedOpts.map(i=>(qi.opts[i]||'').trim().toLowerCase());
-    const corrTexts=(qi.correctTexts||(qi.answer?[qi.answer]:[])).map(t=>t.trim().toLowerCase());
-    const correctSelected=selTexts.filter(t=>corrTexts.includes(t)).length;
-    const wrongSelected=selTexts.filter(t=>!corrTexts.includes(t)).length;
-    const isCorrect=correctSelected===corrTexts.length&&wrongSelected===0;
+  }else if(selectedOpt!==null&&!attemptAnswers[currentQIdx].selected){
+    const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
+    const corrTexts=(qi.correctTexts||[(qi.answer||'')]).map(t=>t.trim().toLowerCase());
+    const isCorrect=corrTexts.includes(selectedText);
     const negDeduct=Math.round(qi.score*negPct*10)/10;
-    let earned=0;
-    if(isCorrect) earned=qi.score;
-    else if(wrongSelected>0) earned=-negDeduct;
+    const earned=isCorrect?qi.score:(negPct>0?-negDeduct:0);
     participantScore=Math.round((participantScore+earned)*10)/10;
-    attemptAnswers[currentQIdx]={selected:selectedOpts.map(i=>KEYS[i]).join(','),correct:isCorrect,score:earned,timeTaken:0,qScore:qi.score};
+    attemptAnswers[currentQIdx]={selected:KEYS[selectedOpt],correct:isCorrect,score:earned,timeTaken:0,qScore:qi.score};
   }
 
   for(let i=currentQIdx+1;i<q.questions.length;i++){
@@ -1628,12 +1652,64 @@ function showFeedback(msg,correct){
 }
 
 // ══════════════════════════════════════════════
-// PWA — Install as App
+// PWA — Full Setup  
 // ══════════════════════════════════════════════
-const manifest={
-  name:'QuizSelf',short_name:'QuizSelf',
-  description:'Self-Paced Quiz Platform',
-  start_url:'./',display:'standalone',
-  background_color:'#0f0f1a',theme_color:'#0f0f1a',
-  icons:[{src:'https://via.placeholder.com/192x192/7c3aed/ffffff?text=QS',sizes:'192x192',type:'image/png'},
-         {src:'https://via.placeholder.com/512x512/7c3aed/ffffff?text=QS',sizes:'512x512',type:'image/pn
+const _iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#c026d3"/></linearGradient></defs><rect width="512" height="512" rx="80" fill="url(#g)"/><text x="256" y="360" font-size="300" text-anchor="middle">&#x1F9E0;</text></svg>`;
+const _iconUrl='data:image/svg+xml;base64,'+btoa(_iconSvg);
+const _manifest={name:'QuizSelf',short_name:'QuizSelf',description:'Self-Paced Quiz Platform',start_url:'./',scope:'./',display:'standalone',orientation:'portrait-primary',background_color:'#0f0f1a',theme_color:'#7c3aed',categories:['education'],icons:[{src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any'},{src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'maskable'},{src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}]};
+const _mblob=new Blob([JSON.stringify(_manifest)],{type:'application/manifest+json'});
+const _mlink=document.createElement('link');_mlink.rel='manifest';_mlink.href=URL.createObjectURL(_mblob);document.head.appendChild(_mlink);
+if('serviceWorker' in navigator){const swCode=`const CACHE='qs-v2';self.addEventListener('install',e=>{self.skipWaiting();});self.addEventListener('activate',e=>{self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.method==='GET')e.respondWith(fetch(e.request).catch(()=>caches.match('/')));});`;navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:'application/javascript'}))).catch(()=>{});}
+let _installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_installPrompt=e;const btn=document.getElementById('pwa-install-btn');if(btn)btn.style.display='';setTimeout(showInstallBanner,3000);});
+window.addEventListener('appinstalled',()=>{const btn=document.getElementById('pwa-install-btn');if(btn)btn.style.display='none';dismissBanner();_installPrompt=null;});
+function showInstallBanner(){if(!_installPrompt||document.getElementById('pwa-banner'))return;const b=document.createElement('div');b.id='pwa-banner';b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1a2e,#16213e);border-top:2px solid #7c3aed;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;z-index:9999;';b.innerHTML=`<div style="font-size:2rem;">&#x1F9E0;</div><div style="flex:1;"><div style="font-weight:700;color:#FFD700;">Install QuizSelf</div><div style="color:#aaa;font-size:.78rem;">Add to home screen</div></div><button onclick="installApp()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);border:none;color:#fff;padding:.6rem 1.2rem;border-radius:50px;font-weight:700;cursor:pointer;">Install</button><button onclick="dismissBanner()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2rem;">&#x2715;</button>`;document.body.appendChild(b);}
+async function installApp(){if(!_installPrompt)return;_installPrompt.prompt();const r=await _installPrompt.userChoice;if(r.outcome==='accepted')dismissBanner();_installPrompt=null;}
+function dismissBanner(){const b=document.getElementById('pwa-banner');if(b)b.remove();}
+function showiOSInstall(){if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone){setTimeout(()=>{if(document.getElementById('pwa-banner'))return;const b=document.createElement('div');b.id='pwa-banner';b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1a1a2e,#16213e);border-top:2px solid #7c3aed;padding:1rem 1.2rem;z-index:9999;';b.innerHTML=`<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem;"><div style="font-size:1.8rem;">&#x1F9E0;</div><div style="font-weight:700;color:#FFD700;">Install on iPhone</div><button onclick="dismissBanner()" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2rem;margin-left:auto;">&#x2715;</button></div><div style="color:#ccc;font-size:.82rem;">Tap Share &#x2B06;&#xFE0F; then Add to Home Screen &#x1F4F2;</div>`;document.body.appendChild(b);},3000);}}
+const _sty=document.createElement('style');_sty.textContent='@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}';document.head.appendChild(_sty);
+window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.search);const qc=p.get('quiz');if(qc){S('take-quiz');document.getElementById('tq-code').value=qc.toUpperCase();}showiOSInstall();});
+</script>
+
+<!-- PRIVACY POLICY -->
+<div id="privacy-policy" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Back</button><span class="gold" style="font-weight:800;">Privacy Policy</span><span></span></div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Privacy Policy</h2>
+      <p style="color:#aaa;margin-bottom:1rem;">Last updated: January 2025</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">1. Information We Collect</h3>
+      <p style="margin-bottom:1rem;">Host accounts: name, email, mobile, city, country, organisation. Participants: name and optional email. Quiz data: questions, answers, scores, time taken.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">2. How We Use It</h3>
+      <p style="margin-bottom:1rem;">To operate QuizSelf, send analytics to hosts, improve services, and show ads via Google AdSense.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">3. Data Storage</h3>
+      <p style="margin-bottom:1rem;">Stored on Google Firebase servers. We do not sell your data.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">4. Advertising</h3>
+      <p style="margin-bottom:1rem;">Google AdSense may use cookies for personalised ads. Opt out at <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a>.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">5. Contact</h3>
+      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS -->
+<div id="terms" class="screen">
+  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:680px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Back</button><span class="gold" style="font-weight:800;">Terms of Use</span><span></span></div>
+    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:1rem;">Terms of Use</h2>
+      <p style="color:#aaa;margin-bottom:1rem;">Last updated: January 2025</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">1. Acceptance</h3>
+      <p style="margin-bottom:1rem;">By using QuizSelf you agree to these terms.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">2. Plans</h3>
+      <p style="margin-bottom:1rem;">Free: 1 day, 1 attempt. Paid: 7 days, unlimited. Premium: 15 days, unlimited. Super: no expiry.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">3. Liability</h3>
+      <p style="margin-bottom:1rem;">QuizSelf is provided as-is. We are not liable for data loss or service interruptions.</p>
+      <h3 style="color:#fff;margin-bottom:.4rem;">4. Contact</h3>
+      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
