@@ -1162,30 +1162,18 @@ function renderQuestion(q){
   selectedOpts=[];
 
   const OPT_COLORS=['#FF4757','#1E90FF','#2ED573','#FFA502'];
-  const isMulti=qi.isMulti||false;
-  const correctCount=isMulti?(qi.correctTexts||[]).length:1;
 
-  // Mode label
-  let modeLbl=q.mode==='flash'?'⚡ Flash — submit before time runs out!':'📝 Normal — select and submit';
-  if(isMulti) modeLbl+=` &nbsp;·&nbsp; <span style="color:#FFD700;font-weight:700;">☑ Select ${correctCount} correct option${correctCount>1?'s':''}</span>`;
+  // Always checkboxes — same UI for all questions so answer count is never revealed
+  const modeLbl=q.mode==='flash'?'⚡ Flash — submit before time runs out!':'📝 Select all correct options and submit';
   document.getElementById('qa-mode-lbl').innerHTML=modeLbl;
+  selectedOpts=[];
 
-  if(isMulti){
-    // Checkbox style — multiple selection
-    document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
-      <button class="opt-btn" id="opt-${i}" onclick="toggleOpt(${i})" style="position:relative;">
-        <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
-        <span style="flex:1;text-align:left;">${o}</span>
-        <span id="chk-${i}" style="font-size:1.3rem;margin-left:.5rem;">☐</span>
-      </button>`).join('');
-  }else{
-    // Single selection
-    document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
-      <button class="opt-btn" id="opt-${i}" onclick="selectOpt(${i})">
-        <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
-        <span style="flex:1;text-align:left;">${o}</span>
-      </button>`).join('');
-  }
+  document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
+    <button class="opt-btn" id="opt-${i}" onclick="toggleOpt(${i})">
+      <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
+      <span style="flex:1;text-align:left;">${o}</span>
+      <span id="chk-${i}" style="font-size:1.2rem;margin-left:.5rem;color:#aaa;">☐</span>
+    </button>`).join('');
 
   document.getElementById('qa-submit').disabled=false;
   if(q.mode==='flash') startFlashTimer(q);
@@ -1211,7 +1199,7 @@ function toggleOpt(idx){
     const chk=document.getElementById('chk-'+i);
     const on=selectedOpts.includes(i);
     b.classList.toggle('selected',on);
-    if(chk)chk.textContent=on?'☑':'☐';
+    if(chk){chk.textContent=on?'☑':'☐';chk.style.color=on?'#FFD700':'#aaa';}
   });
 }
 
@@ -1240,49 +1228,24 @@ function submitAnswer(){
   let isCorrect=false;
   let selectedKey='';
 
-  if(isMulti){
-    // Get selected option texts
+  // Unified scoring — works for single and multi answer
+  {
     const selTexts=selectedOpts.map(i=>(qi.opts[i]||'').trim().toLowerCase());
-    const corrTexts=(qi.correctTexts||[]).map(t=>t.trim().toLowerCase());
-    const totalCorrect=corrTexts.length;
-
-    // Count how many selected are correct and how many are wrong
+    const corrTexts=(qi.correctTexts||(qi.answer?[qi.answer]:[])).map(t=>t.trim().toLowerCase());
+    const totalCorrect=corrTexts.length||1;
     const correctSelected=selTexts.filter(t=>corrTexts.includes(t)).length;
     const wrongSelected=selTexts.filter(t=>!corrTexts.includes(t)).length;
-
     selectedKey=selectedOpts.map(i=>KEYS[i]).join(',');
     isCorrect=(correctSelected===totalCorrect&&wrongSelected===0);
-
     const negDeduct=Math.round(qi.score*negPct*10)/10;
-
-    if(q.scoreMode==='all'){
-      // All or Nothing
-      if(isCorrect){
-        earned=q.mode==='flash'?calcFlashScore(qi.score,timeTaken,q.perQTime):qi.score;
-      }else if(wrongSelected>0){
-        earned=-negDeduct; // selected a wrong option
-      }else{
-        earned=0; // partial correct but no wrong — still 0
-      }
+    if(q.scoreMode==='all'||!qi.isMulti){
+      if(isCorrect){earned=q.mode==='flash'?calcFlashScore(qi.score,timeTaken,q.perQTime):qi.score;}
+      else if(wrongSelected>0){earned=-negDeduct;}
+      else{earned=0;}
     }else{
-      // Pro-rata — marks per correct option selected
       const perOptScore=qi.score/totalCorrect;
       earned=Math.round(correctSelected*perOptScore*10)/10;
-      if(wrongSelected>0) earned=Math.round((earned-negDeduct)*10)/10;
-    }
-
-  }else{
-    // Single answer
-    const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
-    const corrTexts=(qi.correctTexts||[(qi.answer||'')]).map(t=>t.trim().toLowerCase());
-    isCorrect=corrTexts.includes(selectedText);
-    selectedKey=KEYS[selectedOpt];
-    const negDeduct=Math.round(qi.score*negPct*10)/10;
-
-    if(isCorrect){
-      earned=q.mode==='flash'?calcFlashScore(qi.score,timeTaken,q.perQTime):qi.score;
-    }else if(negPct>0){
-      earned=-negDeduct;
+      if(wrongSelected>0)earned=Math.round((earned-negDeduct)*10)/10;
     }
   }
 
@@ -1353,14 +1316,18 @@ function autoSubmitQuiz(q){
     }else{
       attemptAnswers[currentQIdx]={selected:null,correct:false,score:0,timeTaken:0,qScore:qi.score,isMulti:true};
     }
-  }else if(selectedOpt!==null&&!attemptAnswers[currentQIdx].selected){
-    const selectedText=(qi.opts[selectedOpt]||'').trim().toLowerCase();
-    const corrTexts=(qi.correctTexts||[(qi.answer||'')]).map(t=>t.trim().toLowerCase());
-    const isCorrect=corrTexts.includes(selectedText);
+  }else if(selectedOpts.length>0&&!attemptAnswers[currentQIdx].selected){
+    const selTexts=selectedOpts.map(i=>(qi.opts[i]||'').trim().toLowerCase());
+    const corrTexts=(qi.correctTexts||(qi.answer?[qi.answer]:[])).map(t=>t.trim().toLowerCase());
+    const correctSelected=selTexts.filter(t=>corrTexts.includes(t)).length;
+    const wrongSelected=selTexts.filter(t=>!corrTexts.includes(t)).length;
+    const isCorrect=correctSelected===corrTexts.length&&wrongSelected===0;
     const negDeduct=Math.round(qi.score*negPct*10)/10;
-    const earned=isCorrect?qi.score:(negPct>0?-negDeduct:0);
+    let earned=0;
+    if(isCorrect)earned=qi.score;
+    else if(wrongSelected>0)earned=-negDeduct;
     participantScore=Math.round((participantScore+earned)*10)/10;
-    attemptAnswers[currentQIdx]={selected:KEYS[selectedOpt],correct:isCorrect,score:earned,timeTaken:0,qScore:qi.score};
+    attemptAnswers[currentQIdx]={selected:selectedOpts.map(i=>KEYS[i]).join(','),correct:isCorrect,score:earned,timeTaken:0,qScore:qi.score};
   }
 
   for(let i=currentQIdx+1;i<q.questions.length;i++){
@@ -1687,7 +1654,7 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
       <h3 style="color:#fff;margin-bottom:.4rem;">4. Advertising</h3>
       <p style="margin-bottom:1rem;">Google AdSense may use cookies for personalised ads. Opt out at <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a>.</p>
       <h3 style="color:#fff;margin-bottom:.4rem;">5. Contact</h3>
-      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
+      <p><a href="/cdn-cgi/l/email-protection#abcadbced3c7c4ccc2c8999b999eebccc6cac2c785c8c4c6" style="color:var(--gold);"><span class="__cf_email__" data-cfemail="dabbaabfa2b6b5bdb3b9e8eae8ef9abdb7bbb3b6f4b9b5b7">[email&#160;protected]</span></a></p>
     </div>
   </div>
 </div>
@@ -1706,10 +1673,4 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
       <h3 style="color:#fff;margin-bottom:.4rem;">3. Liability</h3>
       <p style="margin-bottom:1rem;">QuizSelf is provided as-is. We are not liable for data loss or service interruptions.</p>
       <h3 style="color:#fff;margin-bottom:.4rem;">4. Contact</h3>
-      <p><a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a></p>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+      <p>
