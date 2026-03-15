@@ -257,8 +257,10 @@ select.inp{appearance:none;}
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem;">
         <div>
-          <label class="lbl">Total Quiz Duration (minutes)</label>
-          <input id="qs-duration" class="inp" type="number" min="1" max="180" value="30" style="margin-bottom:0;">
+          <label class="lbl">Total Quiz Duration (minutes) — max 300 mins (5 hrs)</label>
+          <input id="qs-duration" class="inp" type="number" min="1" max="300" value="60" style="margin-bottom:0;"
+  oninput="updatePerQTime()">
+<div id="per-q-preview" style="font-size:.78rem;color:#FFD700;margin-top:.3rem;"></div>
         </div>
         <div>
           <label class="lbl">Negative Marking (% of question score)</label>
@@ -745,6 +747,23 @@ function initSetup(){
   document.getElementById('flash-plan-note').style.display=isFree?'block':'none';
 }
 
+function updatePerQTime(){
+  const dur=parseInt(document.getElementById('qs-duration').value)||0;
+  const qCount=_questions.length||0;
+  const prev=document.getElementById('per-q-preview');
+  if(!prev)return;
+  if(dur>0&&qCount>0){
+    const perQ=Math.floor((dur*60)/qCount);
+    const mins=Math.floor(perQ/60);
+    const secs=perQ%60;
+    prev.textContent=`⏱ ${qCount} questions × ${mins>0?mins+'m ':''}${secs}s each`;
+  }else if(dur>0){
+    prev.textContent='Upload questions to see time per question';
+  }else{
+    prev.textContent='';
+  }
+}
+
 function selectScoreMode(mode){
   quizScoreMode=mode;
   document.getElementById('score-mode-all').style.borderColor=mode==='all'?'var(--purple)':'#ffffff15';
@@ -826,6 +845,7 @@ function loadQuizXL(inp){
         <span class="muted"> · ✓ ${q.answer} · ${q.score}pts</span>
       </div>`).join('')+(_questions.length>3?`<div class="muted" style="text-align:center;font-size:.8rem;">...and ${_questions.length-3} more</div>`:'');
     document.getElementById('qs-create').disabled=false;
+    updatePerQTime();
   };
   reader.readAsArrayBuffer(file);
 }
