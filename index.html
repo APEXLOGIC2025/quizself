@@ -650,6 +650,7 @@ let totalTimeLeft=0, questionTimeLeft=0;
 let _adminHosts={}, _adminQuizzes=[], _adminUnsub=null;
 let selectedOpt=null;
 let selectedOpts=[]; // for multi-answer questions
+let quizScoreMode='all'; // 'all' or 'prorata'
 
 // ══════════════════════════════════════════════
 // FIREBASE HELPERS
@@ -862,8 +863,6 @@ function initSetup(){
   const isFree=(currentHostProfile?.plan||'free')==='free';
   document.getElementById('flash-plan-note').style.display=isFree?'block':'none';
 }
-
-let quizScoreMode='all'; // 'all' or 'prorata'
 
 function selectScoreMode(mode){
   quizScoreMode=mode;
