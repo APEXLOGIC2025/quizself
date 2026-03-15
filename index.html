@@ -48,9 +48,8 @@
   // Auto-restore session
   onAuthStateChanged(auth, async user=>{
     if(user){
-      // If admin session is active — do NOT redirect to host dashboard
+      // If admin login is in progress — skip (adminLogin handles redirect)
       if(window._adminSessionActive) return;
-      // Auto-restore host session only
       const p=await dbGet('hosts/'+user.uid);
       if(p&&!p.plan){p.plan='free';}
       if(p){
@@ -218,7 +217,8 @@ select.inp{appearance:none;}
         <div style="font-weight:900;font-size:1.2rem;">🧠 QuizSelf</div>
         <div id="hd-plan-badge" style="margin-top:.2rem;"></div>
       </div>
-      <div style="display:flex;gap:.6rem;align-items:center;">
+      <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+        <button id="hd-admin-btn" class="btn btn-sm" style="display:none;background:linear-gradient(135deg,#7c3aed,#c026d3);" onclick="switchToAdminMIS()">🛡️ Admin MIS</button>
         <button class="btn btn-p btn-sm" onclick="S('quiz-setup');initSetup()">+ New Quiz</button>
         <button class="btn btn-k btn-sm" onclick="doSignOut()">Sign Out</button>
       </div>
@@ -463,7 +463,8 @@ select.inp{appearance:none;}
   <div style="width:100%;max-width:960px;">
     <div class="topbar">
       <div style="font-weight:900;font-size:1.2rem;">🛡️ QuizSelf Admin</div>
-      <div style="display:flex;gap:.6rem;">
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button id="ad-host-btn" class="btn btn-sm" style="display:none;background:linear-gradient(135deg,#16a34a,#15803d);" onclick="switchToHostDashboard()">🎓 Host Quiz</button>
         <button class="btn btn-p btn-sm" onclick="loadAdminDashboard()">🔄 Refresh</button>
         <button class="btn btn-k btn-sm" onclick="adminSignOut()">Sign Out</button>
       </div>
@@ -682,6 +683,9 @@ async function loadHostDashboard(){
   if(!p)return;
   const planInfo=PLANS[p.plan]||PLANS.free;
   document.getElementById('hd-welcome').textContent='Welcome, '+p.name+'!';
+  // Show Admin MIS button for super admin
+  const adminBtn=document.getElementById('hd-admin-btn');
+  if(adminBtn) adminBtn.style.display=(p.email===SUPER_EMAIL||p.plan==='super')?'':' none';
   document.getElementById('hd-plan-badge').innerHTML=`<span class="badge badge-${p.plan}">${planInfo.label} Plan</span>`;
 
   const myQRaw=await dbGet('hostQuizzes/'+p.uid);
@@ -1355,16 +1359,56 @@ async function adminLogin(){
   const email=document.getElementById('al-email').value.trim();
   const pass=document.getElementById('al-pass').value;
   hideErr('al-err');
+  if(!email||!pass){showErr('al-err','Enter email and password.');return;}
+  // Set flag BEFORE signIn to block onAuthStateChanged redirect
+  window._adminSessionActive=true;
   try{
     const cred=await window._signIn(window._auth,email,pass);
-    if(cred.user.email!==SUPER_EMAIL){
+    if(cred.user.email===SUPER_EMAIL){
+      // Super admin — go to host dashboard with Admin MIS tab
+      let p=await dbGet('hosts/'+cred.user.uid)||{};
+      p.uid=cred.user.uid;
+      p.email=cred.user.email;
+      p.name=p.name||'Super Admin';
+      p.plan='super';
+      if(!p.registeredAt) await dbSet('hosts/'+cred.user.uid,p);
+      currentUser=cred.user;
+      currentHostProfile=p;
+      window._adminSessionActive=false;
+      S('host-dashboard');
+      loadHostDashboard();
+    }else{
       const flag=await dbGet('admin_flags/'+cred.user.uid+'/isAdmin');
-      if(!flag){showErr('al-err','Not an admin account.');await window._signOut(window._auth);return;}
+      if(!flag){
+        showErr('al-err','Not an admin account.');
+        window._adminSessionActive=false;
+        await window._signOut(window._auth);
+        return;
+      }
+      S('admin-dashboard');
+      loadAdminDashboard();
     }
-    // Mark admin session so onAuthStateChanged does not redirect to host dashboard
-    window._adminSessionActive=true;
-    S('admin-dashboard');loadAdminDashboard();
-  }catch(e){showErr('al-err',authErr(e.code));}
+  }catch(e){
+    window._adminSessionActive=false;
+    showErr('al-err',authErr(e.code));
+  }
+}
+
+function switchToAdminMIS(){
+  // Super admin switches from host dashboard to admin MIS
+  window._adminSessionActive=true;
+  // Show host quiz button in admin dashboard
+  loadAdminDashboard();
+  S('admin-dashboard');
+  const btn=document.getElementById('ad-host-btn');
+  if(btn)btn.style.display='';
+  window._adminSessionActive=false;
+}
+
+function switchToHostDashboard(){
+  // Super admin switches from admin MIS back to host dashboard
+  if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
+  S('host-dashboard');loadHostDashboard();
 }
 
 async function adminSignOut(){
