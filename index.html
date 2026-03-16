@@ -473,6 +473,7 @@ select.inp{appearance:none;}
     <div class="tab-bar" style="max-width:100%;">
       <div class="tab active" onclick="adTab('hosts')">👥 Hosts</div>
       <div class="tab" onclick="adTab('quizzes')">📋 Quizzes</div>
+      <div class="tab" onclick="adTab('live')">🔴 Live</div>
       <div class="tab" onclick="adTab('analytics')">📊 Analytics</div>
     </div>
     <div id="ad-hosts" class="ad-panel">
@@ -501,6 +502,9 @@ select.inp{appearance:none;}
     </div>
     <div id="ad-analytics" class="ad-panel" style="display:none;">
       <div id="ad-analytics-body" style="display:grid;gap:1rem;"></div>
+    </div>
+    <div id="ad-live" class="ad-panel" style="display:none;">
+      <div id="ad-live-body" style="display:grid;gap:1.2rem;"></div>
     </div>
   </div>
 </div><script>
@@ -1432,6 +1436,9 @@ async function loadAdminDashboard(){
       });
     }
     renderAdminStats();renderAdminHosts();renderAdminQuizzes();renderAdminAnalytics();
+    // Re-render live tab if active
+    const liveTab=document.getElementById('ad-live');
+    if(liveTab&&liveTab.style.display!=='none')renderAdminLive();
   });
 }
 
@@ -1449,11 +1456,12 @@ function renderAdminStats(){
 
 function adTab(name){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['hosts','quizzes','analytics'][i]===name);
+    t.classList.toggle('active',['hosts','quizzes','live','analytics'][i]===name);
   });
   document.querySelectorAll('.ad-panel').forEach(p=>p.style.display='none');
   document.getElementById('ad-'+name).style.display='';
   if(name==='analytics')renderAdminAnalytics();
+  if(name==='live')renderAdminLive();
 }
 
 function renderAdminHosts(){
@@ -1520,6 +1528,93 @@ async function adminEndQuiz(qid){
   await dbUpd('quizzes/'+qid,{status:'ended',endedAt:now});
   const q=await dbGet('quizzes/'+qid);
   if(q&&q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
+}
+
+async function renderAdminLive(){
+  const container=document.getElementById('ad-live-body');
+  if(!container)return;
+
+  // Filter live quizzes from index
+  const liveQuizzes=_adQuizzesData.filter(q=>{
+    if(q.status==='ended')return false;
+    if(q.expiresAt&&new Date(q.expiresAt)<new Date())return false;
+    return true;
+  });
+
+  if(!liveQuizzes.length){
+    container.innerHTML=`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">
+      No live quizzes right now</div>`;
+    return;
+  }
+
+  container.innerHTML=`<div style="color:var(--muted);font-size:.82rem;margin-bottom:.5rem;">
+    Showing ${liveQuizzes.length} live quiz${liveQuizzes.length>1?'zes':''}. Click any to see leaderboard.</div>`;
+
+  // Load full quiz data for each live quiz to get leaderboard + attempts
+  for(const qi of liveQuizzes){
+    try{
+      const q=await dbGet('quizzes/'+qi.quizId);
+      if(!q)continue;
+
+      const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>
+        b.score-a.score||a.timeTaken-b.timeTaken):[];
+      const attempts=q.attemptCount||0;
+      const avgScore=lb.length?Math.round(lb.reduce((a,e)=>a+e.score,0)/lb.length):0;
+      const expiry=q.expiresAt?fmtDate(q.expiresAt):'No expiry';
+
+      const card=document.createElement('div');
+      card.className='card2 fade';
+      card.innerHTML=`
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;">${q.title||'Untitled'}</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem;">
+              by ${q.hostName||'—'} &nbsp;·&nbsp; ${q.mode==='flash'?'⚡ Flash':'📝 Normal'}
+              &nbsp;·&nbsp; ${q.questions?q.questions.length:qi.questionCount||0} Qs
+              &nbsp;·&nbsp; Expires: ${expiry}
+            </div>
+          </div>
+          <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
+            <div class="stat-card" style="min-width:70px;">
+              <div class="stat-num" style="font-size:1.4rem;">${attempts}</div>
+              <div class="stat-lbl">Attempts</div>
+            </div>
+            <div class="stat-card" style="min-width:70px;">
+              <div class="stat-num" style="font-size:1.4rem;color:var(--green);">${lb.length}</div>
+              <div class="stat-lbl">Completed</div>
+            </div>
+            <div class="stat-card" style="min-width:70px;">
+              <div class="stat-num" style="font-size:1.4rem;color:var(--blue);">${avgScore}</div>
+              <div class="stat-lbl">Avg Score</div>
+            </div>
+          </div>
+        </div>
+        ${lb.length?`
+        <div style="font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:.6rem;">🏆 Leaderboard</div>
+        <div style="display:grid;gap:.4rem;">
+          ${lb.slice(0,10).map((e,i)=>{
+            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+            const mins=Math.floor((e.timeTaken||0)/60);
+            const secs=(e.timeTaken||0)%60;
+            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
+            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">${medal}</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:.9rem;">${e.name}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+              </div>
+              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">${e.score}</div>
+            </div>`;
+          }).join('')}
+          ${lb.length>10?`<div style="text-align:center;color:var(--muted);font-size:.78rem;padding:.3rem;">
+            ...and ${lb.length-10} more participants</div>`:''}
+        </div>`:`
+        <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:.5rem;">
+          No attempts yet</div>`}
+      `;
+      container.appendChild(card);
+    }catch(e){console.error('Error loading quiz',qi.quizId,e);}
+  }
 }
 
 function renderAdminAnalytics(){
