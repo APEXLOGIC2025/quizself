@@ -1261,17 +1261,35 @@ async function finishAttempt(q){
   };
   try{
     await dbSet('quizzes/'+q.quizId+'/attempts/'+attemptId,attempt);
+    console.log('Attempt saved OK');
+  }catch(e){console.error('Attempt save failed:',e.message);}
+  
+  try{
     await dbUpd('quizzes/'+q.quizId,{attemptCount:(q.attemptCount||0)+1});
-    // Update leaderboard — best score per participant
+    console.log('AttemptCount updated OK');
+  }catch(e){console.error('AttemptCount update failed:',e.message);}
+
+  try{
+    // Save leaderboard entry
     const lb=await dbGet('quizzes/'+q.quizId+'/leaderboard');
-    const existing=lb?Object.entries(lb).find(([k,v])=>v.name===participantName):null;
-    const lbEntry={name:participantName,score:participantScore,timeTaken:totalTime,completedAt:new Date().toISOString()};
-    if(!existing||participantScore>existing[1].score||(participantScore===existing[1].score&&totalTime<existing[1].timeTaken)){
-      // New best score
+    const existing=lb?Object.entries(lb).find(([k,v])=>v&&v.name===participantName):null;
+    const lbEntry={
+      name:participantName||'Anonymous',
+      score:participantScore,
+      timeTaken:totalTime,
+      completedAt:new Date().toISOString()
+    };
+    const isBetter=!existing||
+      participantScore>existing[1].score||
+      (participantScore===existing[1].score&&totalTime<existing[1].timeTaken);
+    if(isBetter){
       const lbKey=existing?existing[0]:'lb_'+Math.random().toString(36).slice(2,8);
       await dbSet('quizzes/'+q.quizId+'/leaderboard/'+lbKey,lbEntry);
+      console.log('Leaderboard saved OK at key:',lbKey);
+    }else{
+      console.log('Existing score is better — leaderboard not updated');
     }
-  }catch(e){console.error('Save attempt failed:',e);}
+  }catch(e){console.error('Leaderboard save FAILED:',e.message,'— Check Firebase rules allow unauthenticated writes to quizzes/');}
 
   // Show result screen
   S('quiz-result');
