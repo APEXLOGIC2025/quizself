@@ -918,7 +918,7 @@ async function manageQuiz(qid){
   S('quiz-manage');
   currentQuizId=qid;
   if(_qmUnsub){_qmUnsub();_qmUnsub=null;}
-  _qmUnsub=dbOn('quizzes/'+qid,q=>{
+  _qmUnsub=dbOn('quizzes/'+qid,async q=>{
     if(!q)return;
     currentQuizData=q;
     const st=getQuizStatus(q);
@@ -930,7 +930,9 @@ async function manageQuiz(qid){
     document.getElementById('qm-end-btn').style.display=st==='live'?'':'none';
     // Stats
     const attempts=q.attemptCount||0;
-    const scores=q.leaderboard?Object.values(q.leaderboard):[];
+    // Fetch leaderboard separately — it is a child node
+    const lbRawQM=await dbGet('quizzes/'+qid+'/leaderboard');
+    const scores=lbRawQM?Object.values(lbRawQM):[];
     const avg=scores.length?Math.round(scores.reduce((a,s)=>a+(s.score||0),0)/scores.length):0;
     document.getElementById('qm-stats').innerHTML=`
       <div class="stat-card"><div class="stat-num">${attempts}</div><div class="stat-lbl">Attempts</div></div>
@@ -1316,7 +1318,9 @@ async function loadLeaderboard(qid){
     <div style="font-weight:900;font-size:1.3rem;color:var(--gold);">${q.title}</div>
     <div style="color:var(--muted);font-size:.85rem;margin-top:.3rem;">${q.questions?q.questions.length:0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
   `;
-  const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
+  // Fetch leaderboard as separate node
+  const lbRaw2=await dbGet('quizzes/'+qid+'/leaderboard');
+  const lb=lbRaw2?Object.values(lbRaw2).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
   document.getElementById('lb-cards').innerHTML=lb.length?lb.map((e,i)=>{
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     const rc=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text)';
@@ -1517,7 +1521,10 @@ function renderAdminQuizzes(){
       <td>${q.attemptCount||0}</td>
       <td><span class="badge badge-${st}">${st}</span></td>
       <td style="font-size:.78rem;">${q.expiresAt?fmtDate(q.expiresAt):'No expiry'}</td>
-      <td>${st==='live'?`<button class="btn btn-r btn-sm" onclick="adminEndQuiz('${q.quizId}')">End</button>`:'—'}</td>
+      <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        ${st==='live'?`<button class="btn btn-r btn-sm" onclick="adminEndQuiz('${q.quizId}')">End</button>`:''}
+        <button class="btn btn-b btn-sm" onclick="adminViewLeaderboard('${q.quizId}','${(q.title||'').replace(/'/g,'')}')">🏆</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1530,12 +1537,66 @@ async function adminEndQuiz(qid){
   if(q&&q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
 }
 
+async function adminViewLeaderboard(qid,title){
+  try{
+    // Fetch quiz info and leaderboard separately
+    const q=await dbGet('quizzes/'+qid);
+    if(!q){alert('Quiz data not found.');return;}
+    // Leaderboard is stored as a separate child node — fetch independently
+    const lbRaw=await dbGet('quizzes/'+qid+'/leaderboard');
+    const lb=lbRaw?Object.values(lbRaw).sort((a,b)=>
+      b.score-a.score||a.timeTaken-b.timeTaken):[];
+    const attempts=q.attemptCount||0;
+
+    if(!lb.length){alert('No completions yet for: '+title);return;}
+
+    // Build leaderboard popup
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+    overlay.innerHTML=`
+      <div style="background:var(--card);border-radius:20px;padding:1.5rem;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--gold);">🏆 ${title}</div>
+            <div style="font-size:.78rem;color:var(--muted);">Attempts: ${attempts} &nbsp;·&nbsp; Completed: ${lb.length}</div>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.5rem;">✕</button>
+        </div>
+        <div style="display:grid;gap:.5rem;">
+          ${lb.map((e,i)=>{
+            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+            const mins=Math.floor((e.timeTaken||0)/60);
+            const secs=(e.timeTaken||0)%60;
+            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
+            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">${medal}</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:.9rem;">${e.name}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+              </div>
+              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">${e.score}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }catch(e){alert('Error loading leaderboard: '+e.message);}
+}
+
 async function renderAdminLive(){
   const container=document.getElementById('ad-live-body');
   if(!container)return;
+  container.innerHTML=`<div style="text-align:center;color:var(--muted);padding:1rem;">Loading...</div>`;
 
-  // Filter live quizzes from index
-  const liveQuizzes=_adQuizzesData.filter(q=>{
+  // Load ALL quizzes directly from quizzes node (not just index)
+  // This ensures we see all quizzes including older ones
+  const allQuizzesRaw=await dbGet('quizzes');
+  const allQuizzes=allQuizzesRaw?Object.values(allQuizzesRaw):[];
+
+  // Filter live quizzes
+  const liveQuizzes=allQuizzes.filter(q=>{
+    if(!q||!q.quizId)return false;
     if(q.status==='ended')return false;
     if(q.expiresAt&&new Date(q.expiresAt)<new Date())return false;
     return true;
@@ -1548,15 +1609,15 @@ async function renderAdminLive(){
   }
 
   container.innerHTML=`<div style="color:var(--muted);font-size:.82rem;margin-bottom:.5rem;">
-    Showing ${liveQuizzes.length} live quiz${liveQuizzes.length>1?'zes':''}. Click any to see leaderboard.</div>`;
+    Showing ${liveQuizzes.length} live quiz${liveQuizzes.length>1?'zes':''}.</div>`;
 
-  // Load full quiz data for each live quiz to get leaderboard + attempts
-  for(const qi of liveQuizzes){
+  // Render each live quiz with leaderboard
+  for(const q of liveQuizzes){
     try{
-      const q=await dbGet('quizzes/'+qi.quizId);
-      if(!q)continue;
 
-      const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>
+      // Fetch leaderboard separately — it is a child node not included in parent fetch
+      const lbRaw=await dbGet('quizzes/'+q.quizId+'/leaderboard');
+      const lb=lbRaw?Object.values(lbRaw).sort((a,b)=>
         b.score-a.score||a.timeTaken-b.timeTaken):[];
       const attempts=q.attemptCount||0;
       const avgScore=lb.length?Math.round(lb.reduce((a,e)=>a+e.score,0)/lb.length):0;
