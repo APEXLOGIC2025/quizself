@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f0f1a">
+<meta name="description" content="QuizSelf by Apexlogic — India's smart quiz platform for NEET, IIT-JEE and competitive exam preparation. Host quizzes, track leaderboards, and measure performance in real time.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="QuizSelf">
-<title>QuizSelf — Self-Paced Quiz Platform</title>
+<title>QuizSelf — NEET, IIT &amp; Competitive Exam Quiz Platform | Apexlogic</title>
 <!-- GOOGLE ADSENSE -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6461655458619662" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -133,33 +134,193 @@ select.inp{appearance:none;}
 
 <!-- LANDING -->
 <div id="landing" class="screen active">
-  <div style="text-align:center;padding:3rem 1rem 2rem;">
-    <div style="font-size:4rem;margin-bottom:.5rem;">🧠</div>
-    <div style="font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;">QuizSelf</div>
-    <div style="color:var(--muted);font-size:1.1rem;margin-bottom:2.5rem;">Self-Paced Quiz Platform</div>
-    <div style="display:flex;flex-direction:column;gap:1rem;max-width:320px;margin:auto;">
-      <button class="btn btn-p" style="font-size:1.1rem;padding:1.1rem;" onclick="S('host-login')">🎓 Host Login</button>
-      <button class="btn btn-b" style="font-size:1.1rem;padding:1.1rem;" onclick="S('take-quiz')">📝 Take a Quiz</button>
-      <button class="btn btn-k btn-sm" onclick="showAdminLogin()">🔐 Admin</button>
-    </div>
 
-    <!-- AD SLOT 1 — Landing page banner ad (uncomment after AdSense approval) -->
-    <!--
-    <div style="margin:1.5rem auto;max-width:320px;">
-      <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
-        data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  <!-- Top navigation -->
+  <div style="width:100%;max-width:1100px;padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0d;margin-bottom:0;">
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#c026d3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🧠</div>
+      <span style="font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">QuizSelf</span>
     </div>
-    -->
-
-    <div style="margin-top:2rem;padding-top:1rem;border-top:1px solid #ffffff11;font-size:.78rem;color:#666;text-align:center;">
-      <span onclick="S('privacy-policy')" style="cursor:pointer;color:#aaa;text-decoration:underline;">Privacy Policy</span>
-      &nbsp;·&nbsp;
-      <span onclick="S('terms')" style="cursor:pointer;color:#aaa;text-decoration:underline;">Terms of Use</span>
-      &nbsp;·&nbsp;
-      <span style="color:#555;">© 2025 QuizSelf by Apex Logic</span>
+    <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-k btn-sm" onclick="S('take-quiz')">Take Quiz</button>
+      <button class="btn btn-p btn-sm" onclick="S('host-login')">Host Login</button>
+      <button class="btn btn-k btn-sm" style="font-size:.78rem;" onclick="showAdminLogin()">Admin</button>
     </div>
   </div>
+
+  <!-- Hero section -->
+  <div style="width:100%;max-width:900px;text-align:center;padding:3.5rem 1.5rem 2.5rem;">
+    <div style="display:inline-block;background:linear-gradient(135deg,#7c3aed22,#c026d322);border:1px solid #7c3aed44;border-radius:50px;padding:.35rem 1.2rem;font-size:.82rem;color:#a78bfa;font-weight:600;margin-bottom:1.2rem;letter-spacing:.5px;">
+      INDIA'S SMARTEST QUIZ PLATFORM
+    </div>
+    <h1 style="font-size:clamp(2.2rem,6vw,4rem);font-weight:900;line-height:1.15;margin-bottom:1.2rem;letter-spacing:-.5px;">
+      <span style="background:linear-gradient(135deg,#fff 0%,#e2e8f0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Master Every Exam</span><br>
+      <span style="background:linear-gradient(135deg,#FFD700,#c026d3,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">with QuizSelf</span>
+    </h1>
+    <p style="font-size:1.15rem;color:#94a3b8;max-width:600px;margin:0 auto 2.5rem;line-height:1.7;">
+      From NEET & IIT-JEE preparation to institutional exams — create, host and take quizzes built for serious learners and educators.
+    </p>
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem;">
+      <button class="btn btn-p" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;" onclick="S('take-quiz')">
+        📝 Take a Quiz
+      </button>
+      <button class="btn" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;background:#ffffff10;border:1.5px solid #ffffff25;color:#fff;" onclick="S('host-login')">
+        🎓 Host a Quiz
+      </button>
+    </div>
+
+    <!-- Stats strip -->
+    <div style="display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;padding:1.5rem;background:#ffffff06;border-radius:20px;border:1px solid #ffffff0d;margin-bottom:3rem;">
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem;font-weight:900;color:#FFD700;">50,000+</div>
+        <div style="font-size:.82rem;color:#64748b;">Quiz Attempts</div>
+      </div>
+      <div style="width:1px;background:#ffffff12;"></div>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem;font-weight:900;color:#2ED573;">1,200+</div>
+        <div style="font-size:.82rem;color:#64748b;">Active Hosts</div>
+      </div>
+      <div style="width:1px;background:#ffffff12;"></div>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem;font-weight:900;color:#1E90FF;">200+</div>
+        <div style="font-size:.82rem;color:#64748b;">Institutions</div>
+      </div>
+      <div style="width:1px;background:#ffffff12;"></div>
+      <div style="text-align:center;">
+        <div style="font-size:1.8rem;font-weight:900;color:#c026d3;">NEET / IIT</div>
+        <div style="font-size:.82rem;color:#64748b;">Exam Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AdSense Slot 1 — Top banner -->
+  <div style="width:100%;max-width:728px;margin:0 auto 2rem;padding:0 1rem;">
+    <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
+      data-ad-slot="AUTO" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+
+  <!-- Features grid -->
+  <div style="width:100%;max-width:900px;padding:0 1.5rem 3rem;">
+    <h2 style="text-align:center;font-size:1.8rem;font-weight:800;margin-bottom:.6rem;">Everything you need to succeed</h2>
+    <p style="text-align:center;color:#64748b;margin-bottom:2rem;font-size:.95rem;">Built for students preparing competitive exams and educators hosting institutional tests</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">⚡</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">Flash Quiz Mode</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Speed-based scoring. Answer faster, score higher. Perfect for competitive exam practice.</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">🏆</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">Live Leaderboard</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Real-time rankings. See where you stand among all participants instantly.</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">📊</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">Excel Upload</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Upload questions via Excel. Supports negative marking, multi-answer, and custom scoring.</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">🔐</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">Secure Host Portal</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Institution-grade controls. Set expiry, manage attempts, view analytics reports.</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">🎯</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">NEET / IIT Ready</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Designed for competitive exam preparation. All-or-nothing and pro-rata scoring modes.</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;">
+        <div style="font-size:2rem;margin-bottom:.8rem;">📱</div>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:.4rem;">Works on Any Device</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.6;">Mobile, tablet, desktop. Install as app on any device. Works offline too.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div style="width:100%;max-width:900px;padding:2rem 1.5rem 3rem;background:#ffffff04;border-radius:24px;margin-bottom:3rem;">
+    <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:2rem;">How it works</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;text-align:center;">
+      <div>
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#c026d3);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;margin:0 auto 1rem;">1</div>
+        <div style="font-weight:700;margin-bottom:.4rem;">Host creates quiz</div>
+        <div style="font-size:.82rem;color:#64748b;">Upload Excel, set timer and mode</div>
+      </div>
+      <div>
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;margin:0 auto 1rem;">2</div>
+        <div style="font-weight:700;margin-bottom:.4rem;">Share quiz code</div>
+        <div style="font-size:.82rem;color:#64748b;">Share link or 6-digit code</div>
+      </div>
+      <div>
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#15803d);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;margin:0 auto 1rem;">3</div>
+        <div style="font-weight:700;margin-bottom:.4rem;">Students attempt</div>
+        <div style="font-size:.82rem;color:#64748b;">Answer on any device, anywhere</div>
+      </div>
+      <div>
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#FFD700,#f59e0b);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;margin:0 auto 1rem;">4</div>
+        <div style="font-weight:700;margin-bottom:.4rem;">Live leaderboard</div>
+        <div style="font-size:.82rem;color:#64748b;">Results and ranks update in real time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plans section -->
+  <div style="width:100%;max-width:900px;padding:0 1.5rem 3rem;">
+    <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:.5rem;">Plans for every need</h2>
+    <p style="text-align:center;color:#64748b;margin-bottom:2rem;font-size:.9rem;">Start free. Upgrade when you need more.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+      <div class="card2" style="padding:1.5rem;border:1.5px solid #1E90FF44;">
+        <div style="color:#1E90FF;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">FREE</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">₹0</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ 1 quiz at a time<br>✓ 1 day active<br>✓ 1 attempt per student<br>✓ Flash quiz (2hr limit)</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;border:1.5px solid #7c3aed44;">
+        <div style="color:#a78bfa;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">PAID</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Contact us</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ 7 days active<br>✓ Unlimited attempts<br>✓ Full analytics<br>✓ Flash quiz (unlimited)</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;border:1.5px solid #FFD70044;">
+        <div style="color:#FFD700;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">PREMIUM</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Contact us</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ 15 days active<br>✓ Unlimited everything<br>✓ Priority support<br>✓ MIS reports</div>
+      </div>
+      <div class="card2" style="padding:1.5rem;border:1.5px solid #c026d344;background:linear-gradient(135deg,#7c3aed11,#c026d311);">
+        <div style="color:#c026d3;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">INSTITUTION</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Custom</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ No expiry<br>✓ Full admin control<br>✓ Bulk hosting<br>✓ Dedicated support</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AdSense Slot 2 -->
+  <div style="width:100%;max-width:728px;margin:0 auto 2rem;padding:0 1rem;">
+    <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
+      data-ad-slot="AUTO" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  </div>
+
+  <!-- About Apexlogic -->
+  <div style="width:100%;max-width:900px;padding:2rem 1.5rem 3rem;text-align:center;">
+    <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:24px;padding:2.5rem;border:1px solid #ffffff0d;">
+      <div style="font-size:1.4rem;font-weight:800;margin-bottom:.8rem;">Built by <span style="color:#FFD700;">Apexlogic</span></div>
+      <p style="color:#94a3b8;max-width:600px;margin:0 auto 1.5rem;line-height:1.7;font-size:.95rem;">
+        QuizSelf is developed by Apexlogic, a technology company dedicated to transforming education through intelligent digital tools. Led by <strong style="color:#fff;">Madhuri Shukla, CEO and Co-founder</strong>, Apexlogic builds platforms that make competitive exam preparation accessible, engaging and effective for every student in India.
+      </p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="about.html" style="color:#a78bfa;font-size:.9rem;text-decoration:none;border-bottom:1px solid #7c3aed44;">About Us →</a>
+        <span style="color:#333;">|</span>
+        <a href="privacy-policy.html" style="color:#a78bfa;font-size:.9rem;text-decoration:none;border-bottom:1px solid #7c3aed44;">Privacy Policy</a>
+        <span style="color:#333;">|</span>
+        <a href="terms.html" style="color:#a78bfa;font-size:.9rem;text-decoration:none;border-bottom:1px solid #7c3aed44;">Terms of Use</a>
+        <span style="color:#333;">|</span>
+        <a href="mailto:apexlogic2025@gmail.com" style="color:#a78bfa;font-size:.9rem;text-decoration:none;">Contact</a>
+      </div>
+      <div style="margin-top:1.5rem;font-size:.78rem;color:#374151;">© 2025 QuizSelf by Apexlogic. All rights reserved.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- HOST LOGIN -->
@@ -473,8 +634,8 @@ select.inp{appearance:none;}
     <div class="tab-bar" style="max-width:100%;">
       <div class="tab active" onclick="adTab('hosts')">👥 Hosts</div>
       <div class="tab" onclick="adTab('quizzes')">📋 Quizzes</div>
-      <div class="tab" onclick="adTab('live')">🔴 Live</div>
       <div class="tab" onclick="adTab('analytics')">📊 Analytics</div>
+      <div class="tab" onclick="adTab('live');renderAdminLive()">🔴 Live</div>
     </div>
     <div id="ad-hosts" class="ad-panel">
       <div style="margin-bottom:1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
@@ -918,7 +1079,7 @@ async function manageQuiz(qid){
   S('quiz-manage');
   currentQuizId=qid;
   if(_qmUnsub){_qmUnsub();_qmUnsub=null;}
-  _qmUnsub=dbOn('quizzes/'+qid,async q=>{
+  _qmUnsub=dbOn('quizzes/'+qid,q=>{
     if(!q)return;
     currentQuizData=q;
     const st=getQuizStatus(q);
@@ -930,9 +1091,7 @@ async function manageQuiz(qid){
     document.getElementById('qm-end-btn').style.display=st==='live'?'':'none';
     // Stats
     const attempts=q.attemptCount||0;
-    // Fetch leaderboard separately — it is a child node
-    const lbRawQM=await dbGet('quizzes/'+qid+'/leaderboard');
-    const scores=lbRawQM?Object.values(lbRawQM):[];
+    const scores=q.leaderboard?Object.values(q.leaderboard):[];
     const avg=scores.length?Math.round(scores.reduce((a,s)=>a+(s.score||0),0)/scores.length):0;
     document.getElementById('qm-stats').innerHTML=`
       <div class="stat-card"><div class="stat-num">${attempts}</div><div class="stat-lbl">Attempts</div></div>
@@ -1261,35 +1420,17 @@ async function finishAttempt(q){
   };
   try{
     await dbSet('quizzes/'+q.quizId+'/attempts/'+attemptId,attempt);
-    console.log('Attempt saved OK');
-  }catch(e){console.error('Attempt save failed:',e.message);}
-  
-  try{
     await dbUpd('quizzes/'+q.quizId,{attemptCount:(q.attemptCount||0)+1});
-    console.log('AttemptCount updated OK');
-  }catch(e){console.error('AttemptCount update failed:',e.message);}
-
-  try{
-    // Save leaderboard entry
+    // Update leaderboard — best score per participant
     const lb=await dbGet('quizzes/'+q.quizId+'/leaderboard');
-    const existing=lb?Object.entries(lb).find(([k,v])=>v&&v.name===participantName):null;
-    const lbEntry={
-      name:participantName||'Anonymous',
-      score:participantScore,
-      timeTaken:totalTime,
-      completedAt:new Date().toISOString()
-    };
-    const isBetter=!existing||
-      participantScore>existing[1].score||
-      (participantScore===existing[1].score&&totalTime<existing[1].timeTaken);
-    if(isBetter){
+    const existing=lb?Object.entries(lb).find(([k,v])=>v.name===participantName):null;
+    const lbEntry={name:participantName,score:participantScore,timeTaken:totalTime,completedAt:new Date().toISOString()};
+    if(!existing||participantScore>existing[1].score||(participantScore===existing[1].score&&totalTime<existing[1].timeTaken)){
+      // New best score
       const lbKey=existing?existing[0]:'lb_'+Math.random().toString(36).slice(2,8);
       await dbSet('quizzes/'+q.quizId+'/leaderboard/'+lbKey,lbEntry);
-      console.log('Leaderboard saved OK at key:',lbKey);
-    }else{
-      console.log('Existing score is better — leaderboard not updated');
     }
-  }catch(e){console.error('Leaderboard save FAILED:',e.message,'— Check Firebase rules allow unauthenticated writes to quizzes/');}
+  }catch(e){console.error('Save attempt failed:',e);}
 
   // Show result screen
   S('quiz-result');
@@ -1336,9 +1477,7 @@ async function loadLeaderboard(qid){
     <div style="font-weight:900;font-size:1.3rem;color:var(--gold);">${q.title}</div>
     <div style="color:var(--muted);font-size:.85rem;margin-top:.3rem;">${q.questions?q.questions.length:0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
   `;
-  // Fetch leaderboard as separate node
-  const lbRaw2=await dbGet('quizzes/'+qid+'/leaderboard');
-  const lb=lbRaw2?Object.values(lbRaw2).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
+  const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
   document.getElementById('lb-cards').innerHTML=lb.length?lb.map((e,i)=>{
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     const rc=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text)';
@@ -1458,9 +1597,6 @@ async function loadAdminDashboard(){
       });
     }
     renderAdminStats();renderAdminHosts();renderAdminQuizzes();renderAdminAnalytics();
-    // Re-render live tab if active
-    const liveTab=document.getElementById('ad-live');
-    if(liveTab&&liveTab.style.display!=='none')renderAdminLive();
   });
 }
 
@@ -1478,12 +1614,11 @@ function renderAdminStats(){
 
 function adTab(name){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['hosts','quizzes','live','analytics'][i]===name);
+    t.classList.toggle('active',['hosts','quizzes','analytics','live'][i]===name);
   });
   document.querySelectorAll('.ad-panel').forEach(p=>p.style.display='none');
   document.getElementById('ad-'+name).style.display='';
   if(name==='analytics')renderAdminAnalytics();
-  if(name==='live')renderAdminLive();
 }
 
 function renderAdminHosts(){
@@ -1553,53 +1688,6 @@ async function adminEndQuiz(qid){
   await dbUpd('quizzes/'+qid,{status:'ended',endedAt:now});
   const q=await dbGet('quizzes/'+qid);
   if(q&&q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
-}
-
-async function adminViewLeaderboard(qid,title){
-  try{
-    // Fetch quiz info and leaderboard separately
-    const q=await dbGet('quizzes/'+qid);
-    if(!q){alert('Quiz data not found.');return;}
-    // Leaderboard is stored as a separate child node — fetch independently
-    const lbRaw=await dbGet('quizzes/'+qid+'/leaderboard');
-    const lb=lbRaw?Object.values(lbRaw).sort((a,b)=>
-      b.score-a.score||a.timeTaken-b.timeTaken):[];
-    const attempts=q.attemptCount||0;
-
-    if(!lb.length){alert('No completions yet for: '+title);return;}
-
-    // Build leaderboard popup
-    const overlay=document.createElement('div');
-    overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
-    overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
-    overlay.innerHTML=`
-      <div style="background:var(--card);border-radius:20px;padding:1.5rem;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-          <div>
-            <div style="font-weight:800;font-size:1.05rem;color:var(--gold);">🏆 ${title}</div>
-            <div style="font-size:.78rem;color:var(--muted);">Attempts: ${attempts} &nbsp;·&nbsp; Completed: ${lb.length}</div>
-          </div>
-          <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.5rem;">✕</button>
-        </div>
-        <div style="display:grid;gap:.5rem;">
-          ${lb.map((e,i)=>{
-            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
-            const mins=Math.floor((e.timeTaken||0)/60);
-            const secs=(e.timeTaken||0)%60;
-            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
-            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;background:#ffffff08;border-radius:10px;">
-              <div style="font-size:${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">${medal}</div>
-              <div style="flex:1;">
-                <div style="font-weight:600;font-size:.9rem;">${e.name}</div>
-                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
-              </div>
-              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">${e.score}</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-  }catch(e){alert('Error loading leaderboard: '+e.message);}
 }
 
 async function renderAdminLive(){
@@ -1754,37 +1842,108 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
 
 <!-- PRIVACY POLICY -->
 <div id="privacy-policy" class="screen">
-  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
-    <div class="topbar" style="max-width:680px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Back</button><span class="gold" style="font-weight:800;">Privacy Policy</span><span></span></div>
-    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
-      <h2 class="gold" style="margin-bottom:1rem;">Privacy Policy</h2>
-      <p style="color:#aaa;margin-bottom:1rem;">Last updated: January 2025</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">1. Information We Collect</h3>
-      <p style="margin-bottom:1rem;">Host accounts: name, email, mobile, city, country, organisation. Participants: name and optional email. Quiz data: questions, answers, scores, time taken.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">2. How We Use It</h3>
-      <p style="margin-bottom:1rem;">To operate QuizSelf, send analytics to hosts, improve services, and show ads via Google AdSense.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">3. Data Storage</h3>
-      <p style="margin-bottom:1rem;">Stored on Google Firebase servers. We do not sell your data.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">4. Advertising</h3>
-      <p style="margin-bottom:1rem;">Google AdSense may use cookies for personalised ads. Opt out at <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a>.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">5. Contact</h3>
-      <p><a href="/cdn-cgi/l/email-protection#abcadbced3c7c4ccc2c8999b999eebccc6cac2c785c8c4c6" style="color:var(--gold);"><span class="__cf_email__" data-cfemail="dabbaabfa2b6b5bdb3b9e8eae8ef9abdb7bbb3b6f4b9b5b7">[email&#160;protected]</span></a></p>
+  <div style="width:100%;max-width:740px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:740px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Home</button><span class="gold" style="font-weight:800;">Privacy Policy</span><span></span></div>
+    <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:.4rem;">Privacy Policy</h2>
+      <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
+
+      <p style="margin-bottom:1.2rem;">QuizSelf ("we", "our", "us") is operated by Apexlogic (India). This policy explains how we collect, use, and protect your personal information when you use QuizSelf at quizself-five.vercel.app.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Information We Collect</h3>
+      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Host accounts:</strong> Full name, email address, mobile number, city, country, and organisation/institution name collected during registration.</p>
+      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Quiz participants:</strong> Name and optional email address entered when joining a quiz. No account creation required.</p>
+      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Quiz activity data:</strong> Questions uploaded by hosts, participant answers, scores, time taken per question, and completion timestamps.</p>
+      <p style="margin-bottom:1.2rem;"><strong style="color:#FFD700;">Technical data:</strong> IP address, browser type, device type, and pages visited — collected automatically via Firebase and Google Analytics.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">2. How We Use Your Information</h3>
+      <p style="margin-bottom:.6rem;">We use collected information to:</p>
+      <ul style="margin-left:1.2rem;margin-bottom:1.2rem;color:#aaa;">
+        <li style="margin-bottom:.4rem;">Operate and improve the QuizSelf platform</li>
+        <li style="margin-bottom:.4rem;">Provide real-time leaderboards and score analytics to quiz hosts</li>
+        <li style="margin-bottom:.4rem;">Send email verification and account notifications</li>
+        <li style="margin-bottom:.4rem;">Display personalised advertisements via Google AdSense</li>
+        <li style="margin-bottom:.4rem;">Detect and prevent fraudulent or abusive activity</li>
+      </ul>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">3. Data Storage and Security</h3>
+      <p style="margin-bottom:1.2rem;">All data is stored securely on Google Firebase Realtime Database servers hosted in the United States. Firebase enforces industry-standard encryption in transit (TLS) and at rest. We do not sell, rent, or share your personal data with third parties except as described in this policy.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">4. Google AdSense and Cookies</h3>
+      <p style="margin-bottom:1.2rem;">We use Google AdSense to display advertisements on QuizSelf. Google may use cookies and similar technologies to serve ads based on your prior visits to our site and other sites on the internet. You can opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" style="color:var(--gold);">google.com/settings/ads</a> or by visiting <a href="https://www.aboutads.info" target="_blank" style="color:var(--gold);">aboutads.info</a>.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">5. Your Rights</h3>
+      <p style="margin-bottom:1.2rem;">You may request deletion of your account and associated data at any time by emailing us. Participant data (name, score) associated with a specific quiz may be retained by the quiz host for analytics purposes.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">6. Children's Privacy</h3>
+      <p style="margin-bottom:1.2rem;">QuizSelf is intended for users aged 13 and above. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided data, please contact us immediately.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">7. Changes to This Policy</h3>
+      <p style="margin-bottom:1.2rem;">We may update this policy periodically. Continued use of QuizSelf after changes constitutes acceptance of the updated policy.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">8. Contact Us</h3>
+      <p>For privacy-related questions or data deletion requests:<br>
+        <strong style="color:#fff;">Apexlogic</strong><br>
+        Email: <a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a><br>
+        Email: <a href="mailto:ceo@apexlogic.in" style="color:var(--gold);">ceo@apexlogic.in</a>
+      </p>
     </div>
   </div>
 </div>
 
 <!-- TERMS -->
 <div id="terms" class="screen">
-  <div style="width:100%;max-width:680px;margin:auto;padding-top:1.5rem;">
-    <div class="topbar" style="max-width:680px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Back</button><span class="gold" style="font-weight:800;">Terms of Use</span><span></span></div>
-    <div class="card" style="max-width:100%;line-height:1.8;font-size:.92rem;color:#ccc;">
-      <h2 class="gold" style="margin-bottom:1rem;">Terms of Use</h2>
-      <p style="color:#aaa;margin-bottom:1rem;">Last updated: January 2025</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">1. Acceptance</h3>
-      <p style="margin-bottom:1rem;">By using QuizSelf you agree to these terms.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">2. Plans</h3>
-      <p style="margin-bottom:1rem;">Free: 1 day, 1 attempt. Paid: 7 days, unlimited. Premium: 15 days, unlimited. Super: no expiry.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">3. Liability</h3>
-      <p style="margin-bottom:1rem;">QuizSelf is provided as-is. We are not liable for data loss or service interruptions.</p>
-      <h3 style="color:#fff;margin-bottom:.4rem;">4. Contact</h3>
-      <p>
+  <div style="width:100%;max-width:740px;margin:auto;padding-top:1.5rem;">
+    <div class="topbar" style="max-width:740px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Home</button><span class="gold" style="font-weight:800;">Terms of Use</span><span></span></div>
+    <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
+      <h2 class="gold" style="margin-bottom:.4rem;">Terms of Use</h2>
+      <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
+
+      <p style="margin-bottom:1.2rem;">These Terms of Use govern your access to and use of QuizSelf, operated by Apexlogic. By using QuizSelf, you agree to be bound by these terms. If you do not agree, please discontinue use immediately.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Description of Service</h3>
+      <p style="margin-bottom:1.2rem;">QuizSelf is an online quiz hosting and participation platform. It allows registered hosts (educators, institutions, trainers) to create and publish quizzes, and allows participants to take those quizzes and view their results on a live leaderboard.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">2. User Accounts and Registration</h3>
+      <p style="margin-bottom:1.2rem;">Host accounts require a valid email address and email verification. You are responsible for maintaining the security of your password. Apexlogic is not liable for any loss resulting from unauthorised access to your account. You must not register on behalf of another person without their consent.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">3. Plans and Limitations</h3>
+      <p style="margin-bottom:.6rem;">QuizSelf operates on a tiered plan system:</p>
+      <ul style="margin-left:1.2rem;margin-bottom:1.2rem;color:#aaa;">
+        <li style="margin-bottom:.4rem;"><strong style="color:#1E90FF;">Free Plan:</strong> Quiz active for 1 day, 1 attempt per participant</li>
+        <li style="margin-bottom:.4rem;"><strong style="color:#a78bfa;">Paid Plan:</strong> Quiz active for 7 days, unlimited attempts, analytics included</li>
+        <li style="margin-bottom:.4rem;"><strong style="color:#FFD700;">Premium Plan:</strong> Quiz active for 15 days, unlimited attempts, priority support</li>
+        <li style="margin-bottom:.4rem;"><strong style="color:#c026d3;">Super/Institution Plan:</strong> No expiry, full admin control, MIS dashboard</li>
+      </ul>
+      <p style="margin-bottom:1.2rem;">Plans are assigned by Apexlogic administrators. Apexlogic reserves the right to modify plan features or pricing at any time with reasonable notice.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">4. Acceptable Use</h3>
+      <p style="margin-bottom:.6rem;">You agree not to:</p>
+      <ul style="margin-left:1.2rem;margin-bottom:1.2rem;color:#aaa;">
+        <li style="margin-bottom:.4rem;">Upload questions containing illegal, offensive, defamatory, or harmful content</li>
+        <li style="margin-bottom:.4rem;">Attempt to manipulate quiz scores or leaderboard rankings artificially</li>
+        <li style="margin-bottom:.4rem;">Reverse engineer, copy, or redistribute QuizSelf's code or design</li>
+        <li style="margin-bottom:.4rem;">Use automated bots or scripts to take quizzes</li>
+        <li style="margin-bottom:.4rem;">Violate any applicable Indian or international law</li>
+      </ul>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">5. Intellectual Property</h3>
+      <p style="margin-bottom:1.2rem;">Quiz content uploaded by hosts remains the intellectual property of the host. By uploading content to QuizSelf, you grant Apexlogic a non-exclusive licence to store and display that content for the purpose of operating the service. QuizSelf's platform design, code, and branding are the property of Apexlogic.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">6. Limitation of Liability</h3>
+      <p style="margin-bottom:1.2rem;">QuizSelf is provided "as is" without warranties of any kind. Apexlogic is not liable for data loss, service interruptions, incorrect scores due to connectivity issues, or any indirect or consequential damages arising from use of the platform.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">7. Governing Law</h3>
+      <p style="margin-bottom:1.2rem;">These terms are governed by the laws of India. Any disputes shall be resolved in the courts of competent jurisdiction in India.</p>
+
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">8. Contact</h3>
+      <p>For questions about these terms:<br>
+        <strong style="color:#fff;">Apexlogic</strong><br>
+        Email: <a href="mailto:apexlogic2025@gmail.com" style="color:var(--gold);">apexlogic2025@gmail.com</a><br>
+        Email: <a href="mailto:ceo@apexlogic.in" style="color:var(--gold);">ceo@apexlogic.in</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
