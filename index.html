@@ -278,18 +278,21 @@ select.inp{appearance:none;}
       </div>
       <div class="card2" style="padding:1.5rem;border:1.5px solid #7c3aed44;">
         <div style="color:#a78bfa;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">PAID</div>
-        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Contact us</div>
-        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ 7 days active<br>✓ Unlimited attempts<br>✓ Full analytics<br>✓ Flash quiz (unlimited)</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">₹ On request</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;margin-bottom:.8rem;">✓ 7 days active<br>✓ Unlimited attempts<br>✓ Full analytics<br>✓ Flash quiz (unlimited)</div>
+        <button onclick="showContactModal('Paid')" style="width:100%;padding:.6rem;border-radius:10px;border:1.5px solid #7c3aed;background:#7c3aed22;color:#a78bfa;font-weight:700;cursor:pointer;font-size:.85rem;">Apply for Paid Plan →</button>
       </div>
       <div class="card2" style="padding:1.5rem;border:1.5px solid #FFD70044;">
         <div style="color:#FFD700;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">PREMIUM</div>
-        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Contact us</div>
-        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ 15 days active<br>✓ Unlimited everything<br>✓ Priority support<br>✓ MIS reports</div>
+        <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">₹ On request</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;margin-bottom:.8rem;">✓ 15 days active<br>✓ Unlimited everything<br>✓ Priority support<br>✓ MIS reports</div>
+        <button onclick="showContactModal('Premium')" style="width:100%;padding:.6rem;border-radius:10px;border:1.5px solid #FFD700;background:#FFD70022;color:#FFD700;font-weight:700;cursor:pointer;font-size:.85rem;">Apply for Premium →</button>
       </div>
       <div class="card2" style="padding:1.5rem;border:1.5px solid #c026d344;background:linear-gradient(135deg,#7c3aed11,#c026d311);">
         <div style="color:#c026d3;font-weight:700;font-size:.85rem;letter-spacing:.5px;margin-bottom:.5rem;">INSTITUTION</div>
         <div style="font-size:1.8rem;font-weight:900;margin-bottom:.8rem;">Custom</div>
-        <div style="font-size:.85rem;color:#64748b;line-height:1.8;">✓ No expiry<br>✓ Full admin control<br>✓ Bulk hosting<br>✓ Dedicated support</div>
+        <div style="font-size:.85rem;color:#64748b;line-height:1.8;margin-bottom:.8rem;">✓ No expiry<br>✓ Full admin control<br>✓ Bulk hosting<br>✓ Dedicated support</div>
+        <button onclick="showContactModal('Institution')" style="width:100%;padding:.6rem;border-radius:10px;border:1.5px solid #c026d3;background:#c026d322;color:#c026d3;font-weight:700;cursor:pointer;font-size:.85rem;">Enrol Institution →</button>
       </div>
     </div>
   </div>
@@ -1690,6 +1693,62 @@ async function adminEndQuiz(qid){
   if(q&&q.hostUid) await dbUpd('hostQuizzes/'+q.hostUid+'/'+qid,{status:'ended',endedAt:now});
 }
 
+async function adminViewLeaderboard(qid,title){
+  try{
+    // Fetch leaderboard directly as a separate node — avoids loading entire quiz object
+    const lbRaw=await dbGet('quizzes/'+qid+'/leaderboard');
+    const q=await dbGet('quizzes/'+qid);
+    const lb=lbRaw?Object.values(lbRaw).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
+    const attempts=q?q.attemptCount||0:0;
+    if(!lb.length){
+      // Show empty state modal instead of alert
+      const overlay=document.createElement('div');
+      overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+      overlay.innerHTML=`<div style="background:var(--card);border-radius:20px;padding:2rem;width:100%;max-width:420px;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🏆</div>
+        <div style="font-weight:800;font-size:1.1rem;color:var(--gold);margin-bottom:.5rem;">${title||'Quiz'}</div>
+        <div style="color:var(--muted);margin-bottom:1.5rem;">No completions yet for this quiz.<br>Attempts started: ${attempts}</div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);border:none;color:#fff;padding:.7rem 2rem;border-radius:50px;font-weight:700;cursor:pointer;">Close</button>
+      </div>`;
+      document.body.appendChild(overlay);
+      return;
+    }
+    const overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+    overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+    overlay.innerHTML=`
+      <div style="background:var(--card);border-radius:20px;padding:1.5rem;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--gold);">🏆 ${title||'Quiz'}</div>
+            <div style="font-size:.78rem;color:var(--muted);">Attempts: ${attempts} &nbsp;·&nbsp; Completed: ${lb.length}</div>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.5rem;">✕</button>
+        </div>
+        <div style="display:grid;gap:.5rem;">
+          ${lb.map((e,i)=>{
+            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+            const mins=Math.floor((e.timeTaken||0)/60);
+            const secs=(e.timeTaken||0)%60;
+            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
+            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:${i<3?'1.4rem':'1rem'};width:36px;text-align:center;font-weight:900;">${medal}</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:.9rem;">${e.name||'—'}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+              </div>
+              <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${e.score}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }catch(e){
+    alert('Error loading leaderboard: '+e.message);
+  }
+}
+
 async function renderAdminLive(){
   const container=document.getElementById('ad-live-body');
   if(!container)return;
@@ -1823,6 +1882,67 @@ function showFeedback(msg,correct){
 // ══════════════════════════════════════════════
 // PWA — Full Setup  
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// CONTACT / SUBSCRIPTION MODAL
+// ══════════════════════════════════════════════
+function showContactModal(plan){
+  const existing=document.getElementById('contact-modal');
+  if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='contact-modal';
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000c;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease;';
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML=`
+    <div style="background:var(--card);border-radius:20px;padding:1.8rem;width:100%;max-width:420px;box-shadow:0 24px 64px #0008;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+        <div>
+          <div style="font-weight:800;font-size:1.1rem;color:var(--gold);">Apply for ${plan} Plan</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:.2rem;">Send us an email to get started</div>
+        </div>
+        <button onclick="document.getElementById('contact-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.4rem;line-height:1;">✕</button>
+      </div>
+
+      <div style="background:#ffffff06;border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;border:1px solid #ffffff0d;">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Step 1 — Send your request to</div>
+        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
+          <div style="font-size:1.3rem;">📧</div>
+          <div>
+            <div style="font-weight:700;color:var(--gold);font-size:.95rem;">apexlogic2025@gmail.com</div>
+            <div style="font-size:.75rem;color:var(--muted);">General enquiries</div>
+          </div>
+          <button onclick="navigator.clipboard.writeText('apexlogic2025@gmail.com').then(()=>this.textContent='Copied!')" style="margin-left:auto;background:transparent;border:1px solid #ffffff22;color:var(--muted);border-radius:8px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;">Copy</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:.8rem;">
+          <div style="font-size:1.3rem;">💼</div>
+          <div>
+            <div style="font-weight:700;color:var(--gold);font-size:.95rem;">ceo@apexlogic.in</div>
+            <div style="font-size:.75rem;color:var(--muted);">CEO / Institution partnerships</div>
+          </div>
+          <button onclick="navigator.clipboard.writeText('ceo@apexlogic.in').then(()=>this.textContent='Copied!')" style="margin-left:auto;background:transparent;border:1px solid #ffffff22;color:var(--muted);border-radius:8px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;">Copy</button>
+        </div>
+      </div>
+
+      <div style="background:#FFD70011;border-radius:12px;padding:1rem;margin-bottom:1.2rem;border:1px solid #FFD70022;">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Step 2 — Include in your email</div>
+        <div style="font-size:.85rem;color:#ccc;line-height:1.8;">
+          • Your full name<br>
+          • Organisation / Institution name<br>
+          • Number of students / quizzes needed<br>
+          • Plan requested: <strong style="color:var(--gold);">${plan}</strong><br>
+          • Your contact number
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.8rem;">
+        <a href="mailto:apexlogic2025@gmail.com?subject=QuizSelf ${plan} Plan Request&body=Hi Apexlogic,%0A%0AI would like to apply for the ${plan} plan on QuizSelf.%0A%0AName: %0AOrganisation: %0AStudents / Quizzes needed: %0AContact number: %0A%0AThank you." style="flex:1;text-align:center;background:linear-gradient(135deg,#7c3aed,#c026d3);border:none;color:#fff;padding:.8rem;border-radius:12px;font-weight:700;cursor:pointer;text-decoration:none;font-size:.9rem;">Open Email App →</a>
+        <button onclick="document.getElementById('contact-modal').remove()" style="background:#ffffff12;border:none;color:var(--muted);padding:.8rem 1.2rem;border-radius:12px;font-weight:600;cursor:pointer;font-size:.9rem;">Close</button>
+      </div>
+
+      <div style="text-align:center;margin-top:1rem;font-size:.75rem;color:#374151;">We respond within 2 business days</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
 const _iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#c026d3"/></linearGradient></defs><rect width="512" height="512" rx="80" fill="url(#g)"/><text x="256" y="360" font-size="300" text-anchor="middle">&#x1F9E0;</text></svg>`;
 const _iconUrl='data:image/svg+xml;base64,'+btoa(_iconSvg);
 const _manifest={name:'QuizSelf',short_name:'QuizSelf',description:'Self-Paced Quiz Platform',start_url:'./',scope:'./',display:'standalone',orientation:'portrait-primary',background_color:'#0f0f1a',theme_color:'#7c3aed',categories:['education'],icons:[{src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any'},{src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:_iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'maskable'},{src:_iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}]};
