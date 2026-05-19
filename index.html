@@ -716,6 +716,42 @@ select.inp{appearance:none;}
   </div>
 </div>
 
+<div id="student-lobby" class="screen">
+  <div style="width:100%;max-width:900px;margin:auto;padding-top:1rem;">
+    <div class="topbar">
+      <button class="btn btn-k btn-sm" onclick="S('landing')">← Back to Home</button>
+      <span class="gold" style="font-weight:800;">🎯 Live Quiz Examination Rooms</span>
+      <button class="btn btn-p btn-sm" onclick="fetchLiveQuizRooms()">🔄 Refresh Rooms</button>
+    </div>
+
+    <div class="card" style="max-width:100%; margin-bottom:1.5rem;">
+      <h3 class="gold" style="margin-bottom:0.8rem; font-size:1.1rem;">📝 Specify Your Examination Requirements</h3>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+        <div>
+          <label class="lbl">Exam Category / Keyword Search</label>
+          <input id="lobby-search" class="inp" placeholder="e.g. NEET, Physics, Organic Chem" oninput="filterLobbyQuizzes()">
+        </div>
+        <div>
+          <label class="lbl">Preferred Quiz Engine Mode</label>
+          <select id="lobby-mode-filter" class="inp" onchange="filterLobbyQuizzes()">
+            <option value="">All Running Engine Formats</option>
+            <option value="normal">📝 Standard Layout (Global Timer)</option>
+            <option value="flash">⚡ Flash Engine (Speed Scoring)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div style="width:100%; margin-bottom:1.5rem; text-align:center;">
+      <script async="async" data-cfasync="false" src="https://pl29496870.effectivecpmnetwork.com/c9523fe898f796b4bb586021a3dbe33e/invoke.js"></script>
+      <div id="container-c9523fe898f796b4bb586021a3dbe33e"></div>
+    </div>
+
+    <div id="lobby-rooms-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; width:100%;">
+      </div>
+  </div>
+</div>
+
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script>
 const SUPER_EMAIL='apexlogic2025@gmail.com';
@@ -807,7 +843,7 @@ async function fetchLiveQuizRooms() {
 
     renderLobbyGrid(_allLobbyQuizzes);
   } catch (e) {
-    grid.innerHTML = `<div class="err-box" style="display:block; grid-column: 1/-1;">Error compiling active lobby rooms: ${e.message}</div>`;
+    grid.innerHTML = `<div class="err-box" style="display:block; grid-column: 1/-1;">Error compiling active lobby rooms: \${e.message}</div>`;
   }
 }
 
@@ -824,31 +860,31 @@ function renderLobbyGrid(quizzes) {
     const multiAnswerCount = q.questions ? q.questions.filter(qi => qi.isMulti).length : 0;
     
     let ruleTooltip = `--- EXAMINATION RULES ---&#10;`;
-    ruleTooltip += `• Engine Format: ${q.mode === 'flash' ? '⚡ FLASH QUIZ (Speed metrics impact scoring scale)' : '📝 STANDARD EXAMINATION (Global pool duration)'}&npsb;&#10;`;
-    ruleTooltip += `• Item Formatting: ${multiAnswerCount > 0 ? '⚠️ CONTAINS MULTIPLE CORRECT OPTIONS (Checkboxes active)' : '🎯 EXCLUSIVELY SINGLE-ANSWER OPTIONS'}&#10;`;
-    ruleTooltip += `• Scoring Protocol: ${q.scoreMode === 'prorata' ? 'Pro-Rata Partitioning (Partial credit allowed)' : 'All-or-Nothing Evaluation'}&#10;`;
-    ruleTooltip += `• Marking Deduction penalty: ${q.negative > 0 ? `Negative Penalty active (-${q.negative}%)` : 'No penalties applied for incorrect variables'}`;
+    ruleTooltip += `• Engine Format: \${q.mode === 'flash' ? '⚡ FLASH QUIZ (Speed metrics impact scoring scale)' : '📝 STANDARD EXAMINATION (Global pool duration)'}&#10;`;
+    ruleTooltip += `• Item Formatting: \${multiAnswerCount > 0 ? '⚠️ CONTAINS MULTIPLE CORRECT OPTIONS (Checkboxes active)' : '🎯 EXCLUSIVELY SINGLE-ANSWER OPTIONS'}&#10;`;
+    ruleTooltip += `• Scoring Protocol: \${q.scoreMode === 'prorata' ? 'Pro-Rata Partitioning (Partial credit allowed)' : 'All-or-Nothing Evaluation'}&#10;`;
+    ruleTooltip += `• Marking Deduction penalty: \${q.negative > 0 ? \`Negative Penalty active (-\${q.negative}%)\` : 'No penalties applied for incorrect variables'}`;
 
     return `
       <div class="card2 fade" 
-           title="${ruleTooltip}" 
+           title="\${ruleTooltip}" 
            style="border: 1px solid #ffffff15; transition: all 0.2s ease; cursor:pointer; display:flex; flex-direction:column; justify-content:space-between;"
            onmouseover="this.style.borderColor='var(--gold)'; this.style.transform='translateY(-2px)';"
            onmouseout="this.style.borderColor='#ffffff15'; this.style.transform='none';"
-           onclick="launchLobbyQuiz('${q.quizId}')">
+           onclick="launchLobbyQuiz('\${q.quizId}')">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
-            <span class="badge badge-${q.mode === 'flash' ? 'live' : 'paid'}">${q.mode === 'flash' ? '⚡ Flash Mode' : '📝 Standard'}</span>
-            <span style="font-size:0.75rem; color:var(--muted);">ID: ${q.quizId}</span>
+            <span class="badge badge-\${q.mode === 'flash' ? 'live' : 'paid'}">\ Gemini Live Mode\${q.mode === 'flash' ? '⚡ Flash Mode' : '📝 Standard'}</span>
+            <span style="font-size:0.75rem; color:var(--muted);">ID: \${q.quizId}</span>
           </div>
-          <h4 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">${q.title || 'Untitled Assessment'}</h4>
-          <p style="font-size:0.82rem; color:var(--muted); line-height:1.4; margin-bottom:0.8rem;">${q.desc ? q.desc.substring(0, 90) : 'No instructions details pinned by host.'}</p>
+          <h4 style="font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:0.4rem;">\${q.title || 'Untitled Assessment'}</h4>
+          <p style="font-size:0.82rem; color:var(--muted); line-height:1.4; margin-bottom:0.8rem;">\${q.desc ? q.desc.substring(0, 90) : 'No instructions details pinned by host.'}</p>
         </div>
         
         <div style="border-top: 1px solid #ffffff0a; padding-top:0.6rem; margin-top:0.4rem; display:flex; flex-wrap:wrap; gap:0.4rem; font-size:0.75rem; color:#94a3b8;">
-          <span>📋 Qs: <strong>${totalQuestions}</strong></span> • 
-          <span>⏱️ Window: <strong>${q.duration}m</strong></span> • 
-          <span>👥 Form: <strong>${multiAnswerCount > 0 ? 'Multi-Choice' : 'Single-Choice'}</strong></span>
+          <span>📋 Qs: <strong>\${totalQuestions}</strong></span> • 
+          <span>⏱️ Window: <strong>\${q.duration}m</strong></span> • 
+          <span>👥 Form: <strong>\${multiAnswerCount > 0 ? 'Multi-Choice' : 'Single-Choice'}</strong></span>
         </div>
       </div>
     `;
@@ -1007,7 +1043,7 @@ async function loadHostDashboard(){
   document.getElementById('hd-welcome').textContent='Welcome, '+p.name+'!';
   const adminBtn=document.getElementById('hd-admin-btn');
   if(adminBtn) adminBtn.style.display=(p.email===SUPER_EMAIL||p.plan==='super')?'':'none';
-  document.getElementById('hd-plan-badge').innerHTML=`<span class="badge badge-${p.plan}">${planInfo.label} Plan</span>`;
+  document.getElementById('hd-plan-badge').innerHTML=`<span class="badge badge-\${p.plan}">\${planInfo.label} Plan</span>`;
 
   const myQRaw=await dbGet('hostQuizzes/'+p.uid);
   const mine=myQRaw?Object.values(myQRaw):[];
@@ -1018,9 +1054,9 @@ async function loadHostDashboard(){
   const totalAttempts=mine.reduce((a,q)=>a+(q.attemptCount||0),0);
 
   document.getElementById('hd-stats').innerHTML=`
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Total Quizzes</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--red);">${live}</div><div class="stat-lbl">Live Now</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${totalAttempts}</div><div class="stat-lbl">Total Attempts</div></div>
+    <div class="stat-card"><div class="stat-num">\${total}</div><div class="stat-lbl">Total Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">\${live}</div><div class="stat-lbl">Live Now</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">\${totalAttempts}</div><div class="stat-lbl">Total Attempts</div></div>
   `;
 
   if(!mine.length){
@@ -1032,14 +1068,14 @@ async function loadHostDashboard(){
     const exp=q.expiresAt?'Expires '+fmtDate(q.expiresAt):'No expiry';
     return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
       <div style="flex:1;min-width:150px;">
-        <div style="font-weight:700;font-size:1rem;">${q.title||'Untitled'}</div>
-        <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem;">${q.questions?q.questions.length:0} Qs · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min · ${exp}</div>
+        <div style="font-weight:700;font-size:1rem;">\${q.title||'Untitled'}</div>
+        <div style="color:var(--muted);font-size:.8rem;margin-top:.2rem;">\${q.questions?q.questions.length:0} Qs · \text{\${q.mode==='flash'?'⚡ Flash':'📝 Normal'}} · \${q.duration}min · \text{\${exp}}</div>
       </div>
       <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
-        <span class="badge badge-${st}">${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}</span>
-        <span style="font-size:.8rem;color:var(--muted);">${q.attemptCount||0} attempts</span>
-        <button class="btn btn-b btn-sm" onclick="manageQuiz('${q.quizId}')">Manage</button>
-        ${st==='live'?`<button class="btn btn-r btn-sm" onclick="endQuizById('${q.quizId}')">End</button>`:''}
+        <span class="badge badge-\${st}">\text{\${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}}</span>
+        <span style="font-size:.8rem;color:var(--muted);">\${q.attemptCount||0} attempts</span>
+        <button class="btn btn-b btn-sm" onclick="manageQuiz('\${q.quizId}')">Manage</button>
+        \${st==='live'?\`<button class="btn btn-r btn-sm" onclick="endQuizById('\${q.quizId}')">End</button>\`:''}
       </div>
     </div>`;
   }).join('');
@@ -1077,7 +1113,7 @@ function updatePerQTime(){
     const perQ=Math.floor((dur*60)/qCount);
     const mins=Math.floor(perQ/60);
     const secs=perQ%60;
-    prev.textContent=`⏱ ${qCount} questions × ${mins>0?mins+'m ':''}${secs}s each`;
+    prev.textContent=`⏱ \${qCount} questions × \${mins>0?mins+'m ':''}\${secs}s each`;
   }else if(dur>0){
     prev.textContent='Upload questions to see time per question';
   }else{
@@ -1153,12 +1189,12 @@ function loadQuizXL(inp){
 
       return {q,opts:shuffled,answer:answerRaw,correctTexts,isMulti,score};
     });
-    document.getElementById('qs-label').textContent=`✅ ${_questions.length} questions loaded`;
+    document.getElementById('qs-label').textContent=`✅ \${_questions.length} questions loaded`;
     document.getElementById('qs-preview').innerHTML=_questions.slice(0,3).map((q,i)=>`
       <div style="background:#ffffff08;border-radius:8px;padding:.5rem .9rem;margin-bottom:.4rem;font-size:.82rem;">
-        <strong style="color:var(--gold);">Q${i+1}:</strong> ${q.q.substring(0,70)}
-        <span class="muted"> · ✓ ${q.answer} · ${q.score}pts</span>
-      </div>`).join('')+(_questions.length>3?`<div class="muted" style="text-align:center;font-size:.8rem;">...and ${_questions.length-3} more</div>`:'');
+        <strong style="color:var(--gold);">Q\${i+1}:</strong> \${q.q.substring(0,70)}
+        <span class="muted"> · ✓ \${q.answer} · \text{\${q.score}pts}</span>
+      </div>`).join('')+(_questions.length>3?`<div class="muted" style="text-align:center;font-size:.8rem;">...and \${_questions.length-3} more</div>`:'');
     document.getElementById('qs-create').disabled=false;
     updatePerQTime();
   };
@@ -1226,7 +1262,7 @@ async function manageQuiz(qid){
     currentQuizData=q;
     const st=getQuizStatus(q);
     document.getElementById('qm-title').textContent=q.title||'Quiz';
-    document.getElementById('qm-status-badge').innerHTML=`<span class="badge badge-${st}">${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}</span>`;
+    document.getElementById('qm-status-badge').innerHTML=`<span class="badge badge-\${st}">\text{\Highlight{\${st==='live'?'🔴 Live':st==='ended'?'✅ Ended':'⏰ Expired'}}}</span>`;
     document.getElementById('qm-expiry').textContent=q.expiresAt?'Expires: '+fmtDate(q.expiresAt):'No expiry (Super)';
     const link=window.location.href.split('?')[0]+'?quiz='+qid;
     document.getElementById('qm-link').textContent=link;
@@ -1235,18 +1271,18 @@ async function manageQuiz(qid){
     const scores=q.leaderboard?Object.values(q.leaderboard):[];
     const avg=scores.length?Math.round(scores.reduce((a,s)=>a+(s.score||0),0)/scores.length):0;
     document.getElementById('qm-stats').innerHTML=`
-      <div class="stat-card"><div class="stat-num">${attempts}</div><div class="stat-lbl">Attempts</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green);">${scores.length}</div><div class="stat-lbl">Completed</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="stat-num">\text{\${attempts}}</div><div class="stat-lbl">Attempts</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green);">\text{\${scores.length}}</div><div class="stat-lbl">Completed</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--blue);">\text{\${avg}}</div><div class="stat-lbl">Avg Score</div></div>
     `;
     const lb=scores.sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken);
     document.getElementById('qm-leaderboard').innerHTML=lb.length?lb.map((e,i)=>{
       const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
       return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
-        <div style="font-size:1.5rem;width:40px;text-align:center;">${medal}</div>
-        <div style="flex:1;"><div style="font-weight:700;">${e.name}</div>
-          <div style="font-size:.78rem;color:var(--muted);⏱ ${fmtSec(e.timeTaken)}</div></div>
-        <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">${e.score}</div>
+        <div style="font-size:1.5rem;width:40px;text-align:center;">\text{\${medal}}</div>
+        <div style="flex:1;"><div style="font-weight:700;">\text{\${e.name}}</div>
+          <div style="font-size:.78rem;color:var(--muted);">⏱ \text{\${fmtSec(e.timeTaken)}}</div></div>
+        <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">\text{\${e.score}}</div>
       </div>`;
     }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:1.5rem;">No completions yet</div>`;
   });
@@ -1356,7 +1392,7 @@ function startFlashTimer(q){
 function renderQuestion(q){
   const qi=q.questions[currentQIdx];
   const total=q.questions.length;
-  document.getElementById('qa-qnum').textContent=`Q ${currentQIdx+1} / ${total}`;
+  document.getElementById('qa-qnum').textContent=`Q \${currentQIdx+1} / \text{\${total}}`;
   document.getElementById('qa-progress').style.width=((currentQIdx/total)*100)+'%';
   document.getElementById('qa-qtxt').textContent=qi.q;
   document.getElementById('qa-score-disp').textContent='Score: '+participantScore;
@@ -1369,10 +1405,10 @@ function renderQuestion(q){
   document.getElementById('qa-mode-lbl').innerHTML=modeLbl;
 
   document.getElementById('qa-opts').innerHTML=qi.opts.map((o,i)=>`
-    <button class="opt-btn" id="opt-${i}" onclick="toggleOpt(${i})">
-      <span class="q-shape" style="background:${OPT_COLORS[i]}22;color:${OPT_COLORS[i]};">${KEYS[i]}</span>
-      <span style="flex:1;text-align:left;">${o}</span>
-      <span id="chk-${i}" style="font-size:1.2rem;margin-left:.5rem;color:#aaa;">☐</span>
+    <button class="opt-btn" id="opt-\${i}" onclick="toggleOpt(\${i})">
+      <span class="q-shape" style="background:\${OPT_COLORS[i]}22;color:\${OPT_COLORS[i]};">\text{\${KEYS[i]}}</span>
+      <span style="flex:1;text-align:left;">\${o}</span>
+      <span id="chk-\${i}" style="font-size:1.2rem;margin-left:.5rem;color:#aaa;">☐</span>
     </button>`).join('');
 
   document.getElementById('qa-submit').disabled=false;
@@ -1437,8 +1473,8 @@ function submitAnswer(){
     timeTaken:q.mode==='flash'?timeTaken:0,qScore:qi.score,isMulti
   };
 
-  const earnedStr=earned>0?`+${earned}`:String(earned);
-  showFeedback(isCorrect?`✅ Correct! ${earnedStr} pts`:`❌ ${isMulti?'Incomplete/Wrong':'Wrong'}! ${earned<0?earnedStr:'0'} pts`,isCorrect);
+  const earnedStr=earned>0?`+\${earned}`:String(earned);
+  showFeedback(isCorrect?`✅ Correct! \${earnedStr} pts`:`❌ \text{\${isMulti?'Incomplete/Wrong':'Wrong'}}! \text{\${earned<0?earnedStr:'0'}} pts`,isCorrect);
 
   document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);
   document.getElementById('qa-submit').disabled=true;
@@ -1557,12 +1593,12 @@ async function finishAttempt(q){
     const icon=!a.selected?'⏭':a.correct?'✅':'❌';
     const col=!a.selected?'var(--muted)':a.correct?'var(--green)':'var(--red)';
     return `<div style="padding:.6rem .8rem;background:#ffffff08;border-radius:10px;display:flex;gap:.8rem;align-items:center;">
-      <div style="font-size:1.2rem;width:28px;text-align:center;">${icon}</div>
+      <div style="font-size:1.2rem;width:28px;text-align:center;">\text{\${icon}}</div>
       <div style="flex:1;">
-        <div style="font-size:.85rem;font-weight:600;color:${col};">Q${i+1}: ${qi.q.substring(0,60)}${qi.q.length>60?'…':''}</div>
+        <div style="font-size:.85rem;font-weight:600;color:\${col};">Q\text{\${i+1}}: \${qi.q.substring(0,60)}\${qi.q.length>60?'…':''}</div>
         <div style="font-size:.75rem;color:var(--muted);">
-          ${a.selected?'Your answer: '+a.selected:'Not answered'}
-          ${a.correct?' · +'+a.score+' pts':a.score<0?' · '+a.score+' pts':''}
+          \text{\${a.selected?'Your answer: '+a.selected:'Not answered'}}
+          \text{\${a.correct?' · +'+a.score+' pts':a.score<0?' · '+a.score+' pts':''}}
         </div>
       </div>
     </div>`;
@@ -1570,7 +1606,7 @@ async function finishAttempt(q){
 
   const plan=PLANS[q.hostPlan||'free']||PLANS.free;
   document.getElementById('qr-retake').innerHTML=plan.attempts>1
-    ?`<button class="btn btn-p btn-sm" onclick="S('take-quiz');document.getElementById('tq-code').value='${q.quizId}'">🔄 Retake Quiz</button>`
+    ?`<button class="btn btn-p btn-sm" onclick="S('take-quiz');document.getElementById('tq-code').value='\${q.quizId}'">🔄 Retake Quiz</button>`
     :`<div style="color:var(--muted);font-size:.82rem;">Free plan: 1 attempt only</div>`;
 }
 
@@ -1579,20 +1615,20 @@ async function loadLeaderboard(qid){
   const q=await dbGet('quizzes/'+qid);
   if(!q){document.getElementById('lb-cards').innerHTML='<div class="card2" style="text-align:center;color:var(--muted);">Quiz not found.</div>';return;}
   document.getElementById('lb-quiz-info').innerHTML=`
-    <div style="font-weight:900;font-size:1.3rem;color:var(--gold);">${q.title}</div>
-    <div style="color:var(--muted);font-size:.85rem;margin-top:.3rem;">${q.questions?q.questions.length:0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
+    <div style="font-weight:900;font-size:1.3rem;color:var(--gold);">\${q.title}</div>
+    <div style="color:var(--muted);font-size:.85rem;margin-top:.3rem;">\${q.questions?q.questions.length:0} Questions · \text{\${q.mode==='flash'?'⚡ Flash':'📝 Normal'}} · \${q.duration}min</div>
   `;
   const lb=q.leaderboard?Object.values(q.leaderboard).sort((a,b)=>b.score-a.score||a.timeTaken-b.timeTaken):[];
   document.getElementById('lb-cards').innerHTML=lb.length?lb.map((e,i)=>{
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     const rc=i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text)';
     return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
-      <div style="font-size:${medal?'1.8rem':'1rem'};font-weight:900;color:${rc};width:44px;text-align:center;">${medal||('#'+(i+1))}</div>
+      <div style="font-size:\${medal?'1.8rem':'1rem'};font-weight:900;color:\${rc};width:44px;text-align:center;">\text{\${medal||('#'+(i+1))}}</div>
       <div style="flex:1;">
-        <div style="font-weight:700;${i<3?'font-size:1.05rem;':''}">${e.name}</div>
-        <div style="font-size:.78rem;color:var(--muted);⏱ ${fmtSec(e.timeTaken)} · ${fmtDate(e.completedAt)}</div>
+        <div style="font-weight:700;\${i<3?'font-size:1.05rem;':''} Margaret Thatcher">\text{\${e.name}}</div>
+        <div style="font-size:.78rem;color:var(--muted);">⏱ \text{\${fmtSec(e.timeTaken)}} · \text{\${fmtDate(e.completedAt)}}</div>
       </div>
-      <div style="font-size:1.5rem;font-weight:900;color:var(--gold);">${e.score}</div>
+      <div style="font-size:1.5rem;font-weight:900;color:var(--gold);">\text{\${e.score}}</div>
     </div>`;
   }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No attempts yet. Be the first!</div>`;
 }
@@ -1615,7 +1651,7 @@ async function sendAnalyticsEmail(q){
   await dbSet('analytics/'+q.quizId,analyticsData);
 }
 
-function showAdminLoginsystem(){S('admin-login');}
+function showAdminLogin(){S('admin-login');}
 
 async function adminLogin(){
   const email=document.getElementById('al-email').value.trim();
@@ -1698,10 +1734,10 @@ function renderAdminStats(){
   const live=_adQuizzesData.filter(q=>q.status==='live'&&(!q.expiresAt||new Date(q.expiresAt)>new Date())).length;
   const attempts=_adQuizzesData.reduce((a,q)=>a+(q.attemptCount||0),0);
   document.getElementById('ad-stats').innerHTML=`
-    <div class="stat-card"><div class="stat-num">${hosts.length}</div><div class="stat-lbl">Total Hosts</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--red);">${live}</div><div class="stat-lbl">Live Quizzes</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green);">${_adQuizzesData.length}</div><div class="stat-lbl">Total Quizzes</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">${attempts}</div><div class="stat-lbl">Total Attempts</div></div>
+    <div class="stat-card"><div class="stat-num">\text{\${hosts.length}}</div><div class="stat-lbl">Total Hosts</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red);">\text{\${live}}</div><div class="stat-lbl">Live Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);">\text{\${_adQuizzesData.length}}</div><div class="stat-lbl">Total Quizzes</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue);">\text{\${attempts}}</div><div class="stat-lbl">Total Attempts</div></div>
   `;
 }
 
@@ -1723,19 +1759,19 @@ function renderAdminHosts(){
   _adQuizzesData.forEach(q=>{qCountByHost[q.hostUid]=(qCountByHost[q.hostUid]||0)+1;});
   document.getElementById('ad-host-body').innerHTML=hosts.map((h,i)=>`
     <tr>
-      <td>${i+1}</td>
-      <td><div style="font-weight:600;">${h.name||'—'}</div><div style="font-size:.75rem;color:var(--muted);">${h.city||''} ${h.country||''}</div></td>
-      <td>${h.email||'—'}</td>
-      <td>${h.mobile||'—'}</td>
-      <td>${h.org||'—'}</td>
-      <td><span class="badge badge-${h.plan||'free'}">${(PLANS[h.plan||'free']||PLANS.free).label}</span></td>
-      <td>${qCountByHost[h.uid]||0}</td>
+      <td>\${i+1}</td>
+      <td><div style="font-weight:600;">\${h.name||'—'}</div><div style="font-size:.75rem;color:var(--muted);">\${h.city||''} \${h.country||''}</div></td>
+      <td>\${h.email||'—'}</td>
+      <td>\${h.mobile||'—'}</td>
+      <td>\${h.org||'—'}</td>
+      <td><span class="badge badge-\${h.plan||'free'}">\text{\${(PLANS[h.plan||'free']||PLANS.free).label}}</span></td>
+      <td>\${qCountByHost[h.uid]||0}</td>
       <td>
-        <select class="inp" style="width:110px;padding:.3rem .5rem;font-size:.8rem;margin-bottom:0;" onchange="changePlan('${h.uid}',this.value)">
-          <option value="free"   ${h.plan==='free'   ?'selected':''}>Free</option>
-          <option value="paid"   ${h.plan==='paid'   ?'selected':''}>Paid</option>
-          <option value="premium"${h.plan==='premium'?'selected':''}>Premium</option>
-          <option value="super"  ${h.plan==='super'  ?'selected':''}>Super</option>
+        <select class="inp" style="width:110px;padding:.3rem .5rem;font-size:.8rem;margin-bottom:0;" onchange="changePlan('\${h.uid}',this.value)">
+          <option value="free"   \${h.plan==='free'   ?'selected':''}>Free</option>
+          <option value="paid"   \${h.plan==='paid'   ?'selected':''}>Paid</option>
+          <option value="premium"\${h.plan==='premium'?'selected':''}>Premium</option>
+          <option value="super"  \${h.plan==='super'  ?'selected':''}>Super</option>
         </select>
       </td>
     </tr>`).join('');
@@ -1759,17 +1795,17 @@ function renderAdminQuizzes(){
   document.getElementById('ad-quiz-body').innerHTML=quizzes.map((q,i)=>{
     const st=getQuizStatus(q);
     return `<tr>
-      <td>${i+1}</td>
-      <td><div style="font-weight:600;">${q.title||'Untitled'}</div><div style="font-size:.72rem;color:var(--gold);">${q.quizId}</div></td>
-      <td><div>${q.hostName||'—'}</div><div style="font-size:.72rem;color:var(--muted);">${q.hostEmail||''}</div></td>
-      <td>${q.mode==='flash'?'⚡ Flash':'📝 Normal'}</td>
-      <td>${q.questions?.length||0}</td>
-      <td>${q.attemptCount||0}</td>
-      <td><span class="badge badge-${st}">${st}</span></td>
-      <td style="font-size:.78rem;">${q.expiresAt?fmtDate(q.expiresAt):'No expiry'}</td>
+      <td>\${i+1}</td>
+      <td><div style="font-weight:600;">\${q.title||'Untitled'}</div><div style="font-size:.72rem;color:var(--gold);">\${q.quizId}</div></td>
+      <td><div>\${q.hostName||'—'}</div><div style="font-size:.72rem;color:var(--muted);">\${q.hostEmail||''}</div></td>
+      <td>\text{\${q.mode==='flash'?'⚡ Flash':'📝 Normal'}}</td>
+      <td>\${q.questions?.length||0}</td>
+      <td>\${q.attemptCount||0}</td>
+      <td><span class="badge badge-\${st}">\text{\${st}}</span></td>
+      <td style="font-size:.78rem;">\text{\${q.expiresAt?fmtDate(q.expiresAt):'No expiry'}}</td>
       <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
-        ${st==='live'?`<button class="btn btn-r btn-sm" onclick="adminEndQuiz('${q.quizId}')">End</button>`:''}
-        <button class="btn btn-b btn-sm" onclick="adminViewLeaderboard('${q.quizId}','${(q.title||'').replace(/'/g,'')}')">🏆</button>
+        \${st==='live'?\`<button class="btn btn-r btn-sm" onclick="adminEndQuiz('\${q.quizId}')">End</button>\`:''}
+        <button class="btn btn-b btn-sm" onclick="adminViewLeaderboard('\${q.quizId}','\${(q.title||'').replace(/'/g,'')}')">🏆</button>
       </td>
     </tr>`;
   }).join('');
@@ -1795,8 +1831,8 @@ async function adminViewLeaderboard(qid,title){
       overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
       overlay.innerHTML=`<div style="background:var(--card);border-radius:20px;padding:2rem;width:100%;max-width:420px;text-align:center;">
         <div style="font-size:3rem;margin-bottom:1rem;">🏆</div>
-        <div style="font-weight:800;font-size:1.1rem;color:var(--gold);margin-bottom:.5rem;">${title||'Quiz'}</div>
-        <div style="color:var(--muted);margin-bottom:1.5rem;">No completions yet for this quiz.<br>Attempts started: ${attempts}</div>
+        <div style="font-weight:800;font-size:1.1rem;color:var(--gold);margin-bottom:.5rem;">\text{\${title||'Quiz'}}</div>
+        <div style="color:var(--muted);margin-bottom:1.5rem;">No completions yet for this quiz.<br>Attempts started: \text{\${attempts}}</div>
         <button onclick="this.closest('[style*=fixed]').remove()" style="background:linear-gradient(135deg,#7c3aed,#c026d3);border:none;color:#fff;padding:.7rem 2rem;border-radius:50px;font-weight:700;cursor:pointer;">Close</button>
       </div>`;
       document.body.appendChild(overlay);
@@ -1809,25 +1845,25 @@ async function adminViewLeaderboard(qid,title){
       <div style="background:var(--card);border-radius:20px;padding:1.5rem;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
           <div>
-            <div style="font-weight:800;font-size:1.05rem;color:var(--gold);">🏆 ${title||'Quiz'}</div>
-            <div style="font-size:.78rem;color:var(--muted);">Attempts: ${attempts} &nbsp;·&nbsp; Completed: ${lb.length}</div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--gold);">🏆 \text{\${title||'Quiz'}}</div>
+            <div style="font-size:.78rem;color:var(--muted);">Attempts: \text{\${attempts}} &nbsp;·&nbsp; Completed: \text{\${lb.length}}</div>
           </div>
           <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.5rem;">✕</button>
         </div>
         <div style="display:grid;gap:.5rem;">
-          ${lb.map((e,i)=>{
+          \${lb.map((e,i)=>{
             const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
             const mins=Math.floor((e.timeTaken||0)/60);
             const secs=(e.timeTaken||0)%60;
             const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
-            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;background:#ffffff08;border-radius:10px;">
-              <div style="font-size:${i<3?'1.4rem':'1rem'};width:36px;text-align:center;font-weight:900;">${medal}</div>
+            return \`<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:\${i<3?'1.4rem':'1rem'};width:36px;text-align:center;font-weight:900;">\${medal}</div>
               <div style="flex:1;">
-                <div style="font-weight:600;font-size:.9rem;">${e.name||'—'}</div>
-                <div style="font-size:.72rem;color:var(--muted);⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+                <div style="font-weight:600;font-size:.9rem;">\${e.name||'—'}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ \${timeStr} &nbsp;·&nbsp; \${fmtDate(e.completedAt)}</div>
               </div>
-              <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${e.score}</div>
-            </div>`;
+              <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">\${e.score}</div>
+            </div>\`;
           }).join('')}
         </div>
       </div>`;
@@ -1837,7 +1873,7 @@ async function adminViewLeaderboard(qid,title){
   }
 }
 
-async function renderAdminLiveSystem(){
+async function renderAdminLive(){
   const container=document.getElementById('ad-live-body');
   if(!container)return;
   container.innerHTML=`<div style="text-align:center;color:var(--muted);padding:1rem;">Loading...</div>`;
@@ -1857,7 +1893,7 @@ async function renderAdminLiveSystem(){
     return;
   }
 
-  container.innerHTML=`<div style="color:var(--muted);font-size:.82rem;margin-bottom:.5rem;">Showing ${liveQuizzes.length} live quiz${liveQuizzes.length>1?'zes':''}.</div>`;
+  container.innerHTML=`<div style="color:var(--muted);font-size:.82rem;margin-bottom:.5rem;">Showing \${liveQuizzes.length} live quiz\${liveQuizzes.length>1?'zes':''}.</div>`;
 
   for(const q of liveQuizzes){
     try{
@@ -1873,36 +1909,36 @@ async function renderAdminLiveSystem(){
       card.innerHTML=`
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1rem;">
           <div>
-            <div style="font-weight:800;font-size:1.05rem;">${q.title||'Untitled'}</div>
+            <div style="font-weight:800;font-size:1.05rem;">\${q.title||'Untitled'}</div>
             <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem;">
-              by ${q.hostName||'—'} &nbsp;·&nbsp; ${q.mode==='flash'?'⚡ Flash':'📝 Normal'}
-              &nbsp;·&nbsp; ${q.questions?q.questions.length:0} Qs
-              &nbsp;·&nbsp; Expires: ${expiry}
+              by \${q.hostName||'—'} &nbsp;·&nbsp; \text{\${q.mode==='flash'?'⚡ Flash':'📝 Normal'}}
+              &nbsp;·&nbsp; \${q.questions?q.questions.length:0} Qs
+              &nbsp;·&nbsp; Expires: \text{\${expiry}}
             </div>
           </div>
           <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
-            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;">${attempts}</div><div class="stat-lbl">Attempts</div></div>
-            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;color:var(--green);">${lb.length}</div><div class="stat-lbl">Completed</div></div>
-            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;color:var(--blue);">${avgScore}</div><div class="stat-lbl">Avg Score</div></div>
+            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;">\text{\${attempts}}</div><div class="stat-lbl">Attempts</div></div>
+            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;color:var(--green);">\text{\${lb.length}}</div><div class="stat-lbl">Completed</div></div>
+            <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;color:var(--blue);">\text{\${avgScore}}</div><div class="stat-lbl">Avg Score</div></div>
           </div>
         </div>
         \${lb.length?\`
         <div style="font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:.6rem;">🏆 Leaderboard</div>
         <div style="display:grid;gap:.4rem;">
-          \${lb.slice(0,10).map((e,i)=>{
+          \text{\${lb.slice(0,10).map((e,i)=>{
             const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
             const mins=Math.floor((e.timeTaken||0)/60);
             const secs=(e.timeTaken||0)%60;
             const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
-            return \`<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
-              <div style="font-size:\${i<3?'1.3rem':'.9rem'};\${i<3?'width:32px;':'width:32px;'}text-align:center;font-weight:900;">\${medal}</div>
+            return \\\`<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:\\\${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">\\\ medal</div>
               <div style="flex:1;">
-                <div style="font-weight:600;font-size:.9rem;">\${e.name}</div>
-                <div style="font-size:.72rem;color:var(--muted);">⏱ \${timeStr} &nbsp;·&nbsp; \${fmtDate(e.completedAt)}</div>
+                <div style="font-weight:600;font-size:.9rem;">\\\ e.name</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ \\\ timeStr &nbsp;·&nbsp; \\\ fmtDate(e.completedAt)</div>
               </div>
-              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">\${e.score}</div>
-            </div>\`;
-          }).join('')}
+              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">\\\ e.score</div>
+            </div>\\\`;
+          }).join('')}}
           \${lb.length>10?\`<div style="text-align:center;color:var(--muted);font-size:.78rem;padding:.3rem;">...and \${lb.length-10} more participants</div>\`:''}
         </div>\`:\`<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:.5rem;">No attempts yet</div>\`}
       `;
@@ -1919,13 +1955,13 @@ function renderAdminAnalytics(){
     const st=getQuizStatus(q);
     return `<div class="card2">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
-        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
+        <div><div style="font-weight:700;">\${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by \${q.hostName} · <span class="badge badge-\${st}">\text{\${st}}</span></div></div>
         <div style="display:flex;gap:.8rem;">
-          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">${q.attemptCount||0}</div><div class="stat-lbl">Attempts</div></div>
-          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
+          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">\text{\${q.attemptCount||0}}</div><div class="stat-lbl">Attempts</div></div>
+          <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">\text{\${avg}}</div><div class="stat-lbl">Avg Score</div></div>
         </div>
       </div>
-      <div style="font-size:.8rem;color:var(--muted);">${q.questions?.length||0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
+      <div style="font-size:.8rem;color:var(--muted);">\${q.questions?.length||0} Questions · \text{\${q.mode==='flash'?'⚡ Flash':'📝 Normal'}} · \${q.duration}min</div>
     </div>`;
   }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No quiz data yet.</div>`;
 }
@@ -1933,7 +1969,7 @@ function renderAdminAnalytics(){
 function fmtSec(s){
   if(!s&&s!==0)return '—';
   const m=Math.floor(s/60),sec=Math.floor(s%60);
-  return m>0?`${m}m ${sec}s`:`${sec}s`;
+  return m>0?`\${m}m \${sec}s`:`\${sec}s`;
 }
 function fmtDate(iso){
   if(!iso)return '—';
@@ -1941,7 +1977,7 @@ function fmtDate(iso){
   catch(e){return iso;}
 }
 function showFeedback(msg,correct){
-  document.getElementById('qa-feedback').innerHTML=`<span style="color:${correct?'var(--green)':'var(--red)'};font-weight:700;font-size:1rem;">${msg}</span>`;
+  document.getElementById('qa-feedback').innerHTML=`<span style="color:\${correct?'var(--green)':'var(--red)'};font-weight:700;font-size:1rem;">\${msg}</span>`;
 }
 
 function showContactModal(plan){
