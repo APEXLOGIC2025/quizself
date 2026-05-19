@@ -20,7 +20,7 @@
            sendEmailVerification, signOut, onAuthStateChanged, updateProfile }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // ── FIREBASE PROJECT CONFIG ──
+  // ── REPLACE WITH YOUR NEW FIREBASE PROJECT CONFIG ──
   const firebaseConfig = {
     apiKey:            "AIzaSyDzT-nWQy7yCAHUB47ySeio_ZMHZYciPPY",
     authDomain:        "quizself-da172.firebaseapp.com",
@@ -139,9 +139,9 @@ select.inp{appearance:none;}
     </div>
     <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
       <button class="btn btn-k btn-sm" onclick="if(window.fetchLiveQuizRooms){ S('student-lobby'); fetchLiveQuizRooms(); }">🌐 Browse Live Rooms</button>
-      <button class="btn btn-k btn-sm" onclick="if(window.S){S('take-quiz')}">Enter Code</button>
-      <button class="btn btn-p btn-sm" onclick="if(window.S){S('host-login')}">Host Login</button>
-      <button class="btn btn-k btn-sm" style="font-size:.78rem;" onclick="if(window.showAdminLogin){showAdminLogin()}">Admin</button>
+      <button class="btn btn-k btn-sm" onclick="S('take-quiz')">Enter Code</button>
+      <button class="btn btn-p btn-sm" onclick="S('host-login')">Host Login</button>
+      <button class="btn btn-k btn-sm" style="font-size:.78rem;" onclick="showAdminLogin()">Admin</button>
     </div>
   </div>
 
@@ -161,7 +161,7 @@ select.inp{appearance:none;}
       <button class="btn btn-p" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;" onclick="if(window.fetchLiveQuizRooms){ S('student-lobby'); fetchLiveQuizRooms(); }">
         🚀 Browse Live Quiz Rooms
       </button>
-      <button class="btn" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;background:#ffffff10;border:1.5px solid #ffffff25;color:#fff;" onclick="if(window.S){S('host-login')}">
+      <button class="btn" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;background:#ffffff10;border:1.5px solid #ffffff25;color:#fff;" onclick="S('host-login')">
         🎓 Host a Quiz
       </button>
     </div>
@@ -297,7 +297,7 @@ select.inp{appearance:none;}
   <div style="width:100%;max-width:900px;padding:0 1.5rem 3rem;">
     <h2 style="text-align:center;font-size:1.6rem;font-weight:800;margin-bottom:.5rem;">Quiz &amp; Exam Resources</h2>
     <p style="text-align:center;color:#64748b;margin-bottom:2rem;font-size:.92rem;">Guides and tips to help educators create better quizzes and students prepare smarter</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12rem;">
 
       <a href="blog-how-to-create-effective-quiz.html" style="text-decoration:none;">
         <div style="background:#1a1a2e;border-radius:16px;padding:1.5rem;border:1px solid #ffffff0d;transition:border-color .2s;cursor:pointer;" onmouseover="this.style.borderColor='#7c3aed44'" onmouseout="this.style.borderColor='#ffffff0d'">
@@ -751,6 +751,40 @@ let _allLobbyQuizzes = [];
 window.fetchLiveQuizRooms = fetchLiveQuizRooms;
 window.filterLobbyQuizzes = filterLobbyQuizzes;
 window.launchLobbyQuiz = launchLobbyQuiz;
+window.S = S;
+window.hostLogin = hostLogin;
+window.hostRegister = hostRegister;
+window.checkVerification = checkVerification;
+window.resendVerification = resendVerification;
+window.doSignOut = doSignOut;
+window.initSetup = initSetup;
+window.updatePerQTime = updatePerQTime;
+window.selectScoreMode = selectScoreMode;
+window.selectMode = selectMode;
+window.loadQuizXL = loadQuizXL;
+window.createQuiz = createQuiz;
+window.manageQuiz = manageQuiz;
+window.copyQuizLink = copyQuizLink;
+window.endQuizNow = endQuizNow;
+window.joinQuiz = joinQuiz;
+window.toggleOpt = toggleOpt;
+window.submitAnswer = submitAnswer;
+window.skipQuestion = skipQuestion;
+window.loadLeaderboard = loadLeaderboard;
+window.showAdminLogin = showAdminLogin;
+window.adminLogin = adminLogin;
+window.switchToAdminMIS = switchToAdminMIS;
+window.switchToHostDashboard = switchToHostDashboard;
+window.adminSignOut = adminSignOut;
+window.loadAdminDashboard = loadAdminDashboard;
+window.adTab = adTab;
+window.renderAdminHosts = renderAdminHosts;
+window.changePlan = changePlan;
+window.renderAdminQuizzes = renderAdminQuizzes;
+window.adminEndQuiz = adminEndQuiz;
+window.adminViewLeaderboard = adminViewLeaderboard;
+window.renderAdminLive = renderAdminLive;
+window.showContactModal = showContactModal;
 
 async function fetchLiveQuizRooms() {
   const grid = document.getElementById('lobby-rooms-grid');
@@ -837,9 +871,7 @@ function launchLobbyQuiz(quizId) {
   document.getElementById('tq-name').focus(); 
 }
 
-// ══════════════════════════════════════════════
-// CORE FIREBASE INFRASTRUCTURE
-// ══════════════════════════════════════════════
+// ── FIREBASE DB OPERATORS ──
 function dbSet(path,val){return window._set(window._ref(window._db,path),val);}
 function dbGet(path){return window._get(window._ref(window._db,path)).then(s=>s.val());}
 function dbUpd(path,val){return window._update(window._ref(window._db,path),val);}
@@ -882,9 +914,6 @@ function showLoginForm(){
   document.getElementById('hl-form').style.display='block';
 }
 
-// ══════════════════════════════════════════════
-// MANAGEMENT INTERFACES
-// ══════════════════════════════════════════════
 async function hostLogin(){
   const email=document.getElementById('hl-email').value.trim();
   const pass=document.getElementById('hl-pass').value;
@@ -968,9 +997,6 @@ async function doSignOut(){
   showLoginForm(); S('landing');
 }
 
-// ══════════════════════════════════════════════
-// HOST DASHBOARD CONTROL PANEL
-// ══════════════════════════════════════════════
 async function loadHostDashboard(){
   const p=currentHostProfile;
   if(!p)return;
@@ -1216,7 +1242,7 @@ async function manageQuiz(qid){
       return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
         <div style="font-size:1.5rem;width:40px;text-align:center;">${medal}</div>
         <div style="flex:1;"><div style="font-weight:700;">${e.name}</div>
-          <div style="font-size:.78rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)}</div></div>
+          <div style="font-size:.78rem;color:var(--muted);⏱ ${fmtSec(e.timeTaken)}</div></div>
         <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">${e.score}</div>
       </div>`;
     }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:1.5rem;">No completions yet</div>`;
@@ -1244,9 +1270,6 @@ async function endQuizById(qid){
   loadHostDashboard();
 }
 
-// ══════════════════════════════════════════════
-// STUDENT AND PARTICIPANT RUNTIME PIPELINES
-// ══════════════════════════════════════════════
 async function joinQuiz(){
   const code=document.getElementById('tq-code').value.toUpperCase().trim();
   const name=document.getElementById('tq-name').value.trim();
@@ -1589,9 +1612,6 @@ async function sendAnalyticsEmail(q){
   await dbSet('analytics/'+q.quizId,analyticsData);
 }
 
-// ══════════════════════════════════════════════
-// MASTER ADMINISTRATIVE GATEWAYS
-// ══════════════════════════════════════════════
 function showAdminLogin(){S('admin-login');}
 
 async function adminLogin(){
@@ -1896,7 +1916,7 @@ function renderAdminAnalytics(){
     const st=getQuizStatus(q);
     return `<div class="card2">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
-        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
+        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
         <div style="display:flex;gap:.8rem;">
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">${q.attemptCount||0}</div><div class="stat-lbl">Attempts</div></div>
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
@@ -1907,9 +1927,6 @@ function renderAdminAnalytics(){
   }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No quiz data yet.</div>`;
 }
 
-// ══════════════════════════════════════════════
-// FORMATTERS AND TRANSLATION AGENTS
-// ══════════════════════════════════════════════
 function fmtSec(s){
   if(!s&&s!==0)return '—';
   const m=Math.floor(s/60),sec=Math.floor(s%60);
@@ -1924,9 +1941,6 @@ function showFeedback(msg,correct){
   document.getElementById('qa-feedback').innerHTML=`<span style="color:${correct?'var(--green)':'var(--red)'};font-weight:700;font-size:1rem;">${msg}</span>`;
 }
 
-// ══════════════════════════════════════════════
-// UTILITY SUBSCRIPTION SYSTEM INTERFACES
-// ══════════════════════════════════════════════
 function showContactModal(plan){
   const existing=document.getElementById('contact-modal');
   if(existing)existing.remove();
@@ -1954,12 +1968,9 @@ function showContactModal(plan){
   document.body.appendChild(overlay);
 }
 
-// ══════════════════════════════════════════════
-// EMBEDDED GENERATIVE DESKTOP MANIFEST AGENTS
-// ══════════════════════════════════════════════
 const _iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="purple"/><text x="256" y="360" font-size="300" text-anchor="middle">&#x1F9E0;</text></svg>`;
 const _iconUrl='data:image/svg+xml;base64,'+btoa(_iconSvg);
-const _manifest={name:'QuizSelf',short_name:'QuizSelf',start_url:'./',display:'standalone',background_color:'#0f0f1a',theme_color:'#7c3aed',icons:[{src:_iconUrl,sizes='512x512',type:'image/svg+xml'}]};
+const _manifest={name:'QuizSelf',short_name:'QuizSelf',start_url:'./',display:'standalone',background_color:'#0f0f1a',theme_color:'#7c3aed',icons:[{src:_iconUrl,sizes:'512x512',type:'image/svg+xml'}]};
 const _mblob=new Blob([JSON.stringify(_manifest)],{type:'application/manifest+json'});
 const _mlink=document.createElement('link');_mlink.rel='manifest';_mlink.href=URL.createObjectURL(_mblob);document.head.appendChild(_mlink);
 window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.search);const qc=p.get('quiz');if(qc){S('take-quiz');document.getElementById('tq-code').value=qc.toUpperCase();}});
@@ -1971,9 +1982,9 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
     <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
       <h2 class="gold" style="margin-bottom:.4rem;">Privacy Policy</h2>
       <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
-      <p style="margin-bottom:1.2rem;">QuizSelf is operated by Apexlogic (India). This policy governs the analytical parameters tracked relative to exam compilation datasets.</p>
+      <p style="margin-bottom:1.2rem;">QuizSelf is operated by Apexlogic (India). This policy governs data parameters tracked relative to exam compilation datasets.</p>
       <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Information Profiles</h3>
-      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Host Data:</strong> Full identification parameters needed to track compliance tiers across the network.</p>
+      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Host Data:</strong> Account registration parameters needed to manage host dashboards securely.</p>
     </div>
   </div>
 </div>
@@ -1984,8 +1995,8 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
     <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
       <h2 class="gold" style="margin-bottom:.4rem;">Terms of Use</h2>
       <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
-      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Acceptable Utilization Profiles</h3>
-      <p style="margin-bottom:1.2rem;">Users are bound to refrain from executing script injection loops, bot attacks, or score inflation operations against our distributed Firebase cloud structures.</p>
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Acceptable Use</h3>
+      <p style="margin-bottom:1.2rem;">Users must refrain from automated bot activity, code tampering, or direct script injection loops against our Firebase database nodes.</p>
     </div>
   </div>
 </div>
