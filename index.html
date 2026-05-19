@@ -20,7 +20,7 @@
            sendEmailVerification, signOut, onAuthStateChanged, updateProfile }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // ── REPLACE WITH YOUR NEW FIREBASE PROJECT CONFIG ──
+  // ── FIREBASE PROJECT CONFIG ──
   const firebaseConfig = {
     apiKey:            "AIzaSyDzT-nWQy7yCAHUB47ySeio_ZMHZYciPPY",
     authDomain:        "quizself-da172.firebaseapp.com",
@@ -189,10 +189,9 @@ select.inp{appearance:none;}
     </div>
   </div>
 
-  <div style="width:100%;max-width:728px;margin:0 auto 2rem;padding:0 1rem;">
-    <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
-      data-ad-slot="AUTO" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  <div style="width:100%; max-width:728px; margin:0 auto 2rem; padding:0 1rem; text-align:center;">
+    <script async="async" data-cfasync="false" src="https://pl29496870.effectivecpmnetwork.com/c9523fe898f796b4bb586021a3dbe33e/invoke.js"></script>
+    <div id="container-c9523fe898f796b4bb586021a3dbe33e"></div>
   </div>
 
   <div style="width:100%;max-width:900px;padding:0 1.5rem 3rem;">
@@ -288,10 +287,9 @@ select.inp{appearance:none;}
     </div>
   </div>
 
-  <div style="width:100%;max-width:728px;margin:0 auto 2rem;padding:0 1rem;">
-    <ins class="adsbygoogle" style="display:block;" data-ad-client="ca-pub-6461655458619662"
-      data-ad-slot="AUTO" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+  <div style="width:100%;max-width:728px;margin:0 auto 2rem;padding:0 1rem; text-align:center;">
+    <script async="async" data-cfasync="false" src="https://pl29496870.effectivecpmnetwork.com/c9523fe898f796b4bb586021a3dbe33e/invoke.js"></script>
+    <div id="container-c9523fe898f796b4bb586021a3dbe33e"></div>
   </div>
 
   <div style="width:100%;max-width:900px;padding:0 1.5rem 3rem;">
@@ -353,7 +351,7 @@ select.inp{appearance:none;}
         <span style="color:#333;">|</span>
         <a href="contact.html" style="color:#a78bfa;font-size:.9rem;text-decoration:none;border-bottom:1px solid #7c3aed44;">Contact Us</a>
       </div>
-      <div style="margin-top:1.5rem;font-size:.78rem;color:#374151;">© 2026 QuizSelf by Apexlogic. All rights reserved.</div>
+      <div style="margin-top:1.5rem;font-size:.78rem;color:#374151;">© 2025 QuizSelf by Apexlogic. All rights reserved.</div>
     </div>
   </div>
 
@@ -383,6 +381,11 @@ select.inp{appearance:none;}
           </select>
         </div>
       </div>
+    </div>
+
+    <div style="width:100%; margin-bottom:1.5rem; text-align:center;">
+      <script async="async" data-cfasync="false" src="https://pl29496870.effectivecpmnetwork.com/c9523fe898f796b4bb586021a3dbe33e/invoke.js"></script>
+      <div id="container-c9523fe898f796b4bb586021a3dbe33e"></div>
     </div>
 
     <div id="lobby-rooms-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; width:100%;">
@@ -821,7 +824,7 @@ function renderLobbyGrid(quizzes) {
     const multiAnswerCount = q.questions ? q.questions.filter(qi => qi.isMulti).length : 0;
     
     let ruleTooltip = `--- EXAMINATION RULES ---&#10;`;
-    ruleTooltip += `• Engine Format: ${q.mode === 'flash' ? '⚡ FLASH QUIZ (Speed metrics impact scoring scale)' : '📝 STANDARD EXAMINATION (Global pool duration)'}&#10;`;
+    ruleTooltip += `• Engine Format: ${q.mode === 'flash' ? '⚡ FLASH QUIZ (Speed metrics impact scoring scale)' : '📝 STANDARD EXAMINATION (Global pool duration)'}&npsb;&#10;`;
     ruleTooltip += `• Item Formatting: ${multiAnswerCount > 0 ? '⚠️ CONTAINS MULTIPLE CORRECT OPTIONS (Checkboxes active)' : '🎯 EXCLUSIVELY SINGLE-ANSWER OPTIONS'}&#10;`;
     ruleTooltip += `• Scoring Protocol: ${q.scoreMode === 'prorata' ? 'Pro-Rata Partitioning (Partial credit allowed)' : 'All-or-Nothing Evaluation'}&#10;`;
     ruleTooltip += `• Marking Deduction penalty: ${q.negative > 0 ? `Negative Penalty active (-${q.negative}%)` : 'No penalties applied for incorrect variables'}`;
@@ -1587,7 +1590,7 @@ async function loadLeaderboard(qid){
       <div style="font-size:${medal?'1.8rem':'1rem'};font-weight:900;color:${rc};width:44px;text-align:center;">${medal||('#'+(i+1))}</div>
       <div style="flex:1;">
         <div style="font-weight:700;${i<3?'font-size:1.05rem;':''}">${e.name}</div>
-        <div style="font-size:.78rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)} · ${fmtDate(e.completedAt)}</div>
+        <div style="font-size:.78rem;color:var(--muted);⏱ ${fmtSec(e.timeTaken)} · ${fmtDate(e.completedAt)}</div>
       </div>
       <div style="font-size:1.5rem;font-weight:900;color:var(--gold);">${e.score}</div>
     </div>`;
@@ -1612,7 +1615,7 @@ async function sendAnalyticsEmail(q){
   await dbSet('analytics/'+q.quizId,analyticsData);
 }
 
-function showAdminLogin(){S('admin-login');}
+function showAdminLoginsystem(){S('admin-login');}
 
 async function adminLogin(){
   const email=document.getElementById('al-email').value.trim();
@@ -1821,7 +1824,7 @@ async function adminViewLeaderboard(qid,title){
               <div style="font-size:${i<3?'1.4rem':'1rem'};width:36px;text-align:center;font-weight:900;">${medal}</div>
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:.9rem;">${e.name||'—'}</div>
-                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+                <div style="font-size:.72rem;color:var(--muted);⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
               </div>
               <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${e.score}</div>
             </div>`;
@@ -1834,7 +1837,7 @@ async function adminViewLeaderboard(qid,title){
   }
 }
 
-async function renderAdminLive(){
+async function renderAdminLiveSystem(){
   const container=document.getElementById('ad-live-body');
   if(!container)return;
   container.innerHTML=`<div style="text-align:center;color:var(--muted);padding:1rem;">Loading...</div>`;
@@ -1883,25 +1886,25 @@ async function renderAdminLive(){
             <div class="stat-card" style="min-width:70px;"><div class="stat-num" style="font-size:1.4rem;color:var(--blue);">${avgScore}</div><div class="stat-lbl">Avg Score</div></div>
           </div>
         </div>
-        ${lb.length?`
+        \${lb.length?\`
         <div style="font-weight:700;font-size:.88rem;color:var(--gold);margin-bottom:.6rem;">🏆 Leaderboard</div>
         <div style="display:grid;gap:.4rem;">
-          ${lb.slice(0,10).map((e,i)=>{
+          \${lb.slice(0,10).map((e,i)=>{
             const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
             const mins=Math.floor((e.timeTaken||0)/60);
             const secs=(e.timeTaken||0)%60;
             const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
-            return `<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
-              <div style="font-size:${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">${medal}</div>
+            return \`<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
+              <div style="font-size:\${i<3?'1.3rem':'.9rem'};\${i<3?'width:32px;':'width:32px;'}text-align:center;font-weight:900;">\${medal}</div>
               <div style="flex:1;">
-                <div style="font-weight:600;font-size:.9rem;">${e.name}</div>
-                <div style="font-size:.72rem;color:var(--muted);⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+                <div style="font-weight:600;font-size:.9rem;">\${e.name}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ \${timeStr} &nbsp;·&nbsp; \${fmtDate(e.completedAt)}</div>
               </div>
-              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">${e.score}</div>
-            </div>`;
+              <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">\${e.score}</div>
+            </div>\`;
           }).join('')}
-          ${lb.length>10?`<div style="text-align:center;color:var(--muted);font-size:.78rem;padding:.3rem;">...and ${lb.length-10} more participants</div>`:''}
-        </div>`:`<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:.5rem;">No attempts yet</div>`}
+          \${lb.length>10?\`<div style="text-align:center;color:var(--muted);font-size:.78rem;padding:.3rem;">...and \${lb.length-10} more participants</div>\`:''}
+        </div>\`:\`<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:.5rem;">No attempts yet</div>\`}
       `;
       container.appendChild(card);
     }catch(e) {console.error(e);}
@@ -1916,7 +1919,7 @@ function renderAdminAnalytics(){
     const st=getQuizStatus(q);
     return `<div class="card2">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
-        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
+        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
         <div style="display:flex;gap:.8rem;">
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">${q.attemptCount||0}</div><div class="stat-lbl">Attempts</div></div>
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
@@ -1952,7 +1955,7 @@ function showContactModal(plan){
     <div style="background:var(--card);border-radius:20px;padding:1.8rem;width:100%;max-width:420px;box-shadow:0 24px 64px #0008;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12rem;">
         <div>
-          <div style="font-weight:800;font-size:1.1rem;color:var(--gold);">Apply for ${plan} Plan</div>
+          <div style="font-weight:800;font-size:1.1rem;color:var(--gold);">Apply for \${plan} Plan</div>
         </div>
         <button onclick="document.getElementById('contact-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.4rem;line-height:1;">✕</button>
       </div>
