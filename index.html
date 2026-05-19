@@ -138,10 +138,10 @@ select.inp{appearance:none;}
       <span style="font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,#fff,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">QuizSelf</span>
     </div>
     <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-k btn-sm" onclick="S('student-lobby'); fetchLiveQuizRooms();">🌐 Browse Live Rooms</button>
-      <button class="btn btn-k btn-sm" onclick="S('take-quiz')">Enter Code</button>
-      <button class="btn btn-p btn-sm" onclick="S('host-login')">Host Login</button>
-      <button class="btn btn-k btn-sm" style="font-size:.78rem;" onclick="showAdminLogin()">Admin</button>
+      <button class="btn btn-k btn-sm" onclick="if(window.fetchLiveQuizRooms){ S('student-lobby'); fetchLiveQuizRooms(); }">🌐 Browse Live Rooms</button>
+      <button class="btn btn-k btn-sm" onclick="if(window.S){S('take-quiz')}">Enter Code</button>
+      <button class="btn btn-p btn-sm" onclick="if(window.S){S('host-login')}">Host Login</button>
+      <button class="btn btn-k btn-sm" style="font-size:.78rem;" onclick="if(window.showAdminLogin){showAdminLogin()}">Admin</button>
     </div>
   </div>
 
@@ -158,10 +158,10 @@ select.inp{appearance:none;}
     </p>
 
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem;">
-      <button class="btn btn-p" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;" onclick="S('student-lobby'); fetchLiveQuizRooms();">
+      <button class="btn btn-p" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;" onclick="if(window.fetchLiveQuizRooms){ S('student-lobby'); fetchLiveQuizRooms(); }">
         🚀 Browse Live Quiz Rooms
       </button>
-      <button class="btn" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;background:#ffffff10;border:1.5px solid #ffffff25;color:#fff;" onclick="S('host-login')">
+      <button class="btn" style="font-size:1.1rem;padding:1rem 2.2rem;border-radius:12px;background:#ffffff10;border:1.5px solid #ffffff25;color:#fff;" onclick="if(window.S){S('host-login')}">
         🎓 Host a Quiz
       </button>
     </div>
@@ -969,7 +969,7 @@ async function doSignOut(){
 }
 
 // ══════════════════════════════════════════════
-// DASHBOARD PIPELINES
+// HOST DASHBOARD CONTROL PANEL
 // ══════════════════════════════════════════════
 async function loadHostDashboard(){
   const p=currentHostProfile;
@@ -1216,7 +1216,7 @@ async function manageQuiz(qid){
       return `<div class="card2 fade" style="display:flex;align-items:center;gap:1rem;">
         <div style="font-size:1.5rem;width:40px;text-align:center;">${medal}</div>
         <div style="flex:1;"><div style="font-weight:700;">${e.name}</div>
-          <div style="font-size:.78rem;color:var(--muted);⏱ ${fmtSec(e.timeTaken)}</div></div>
+          <div style="font-size:.78rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)}</div></div>
         <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">${e.score}</div>
       </div>`;
     }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:1.5rem;">No completions yet</div>`;
@@ -1245,7 +1245,7 @@ async function endQuizById(qid){
 }
 
 // ══════════════════════════════════════════════
-// EXAMINATION ENGINE PIPELINES
+// STUDENT AND PARTICIPANT RUNTIME PIPELINES
 // ══════════════════════════════════════════════
 async function joinQuiz(){
   const code=document.getElementById('tq-code').value.toUpperCase().trim();
@@ -1590,7 +1590,7 @@ async function sendAnalyticsEmail(q){
 }
 
 // ══════════════════════════════════════════════
-// ADMIN DASHBOARD SYSTEMS
+// MASTER ADMINISTRATIVE GATEWAYS
 // ══════════════════════════════════════════════
 function showAdminLogin(){S('admin-login');}
 
@@ -1652,12 +1652,13 @@ async function adminSignOut(){
   S('landing');
 }
 
+let _adminUnsubRef = null;
 let _adHostsData={}, _adQuizzesData=[];
 
 async function loadAdminDashboard(){
   _adHostsData=await dbGet('hosts')||{};
-  if(_adminUnsub){_adminUnsub();_adminUnsub=null;}
-  _adminUnsub=dbOn('hostQuizzes',allHostQ=>{
+  if(_adminUnsubRef){_adminUnsubRef();_adminUnsubRef=null;}
+  _adminUnsubRef=dbOn('hostQuizzes',allHostQ=>{
     _adQuizzesData=[];
     if(allHostQ){
       Object.values(allHostQ).forEach(hostQ=>{
@@ -1793,11 +1794,14 @@ async function adminViewLeaderboard(qid,title){
         <div style="display:grid;gap:.5rem;">
           ${lb.map((e,i)=>{
             const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+            const mins=Math.floor((e.timeTaken||0)/60);
+            const secs=(e.timeTaken||0)%60;
+            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
             return `<div style="display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;background:#ffffff08;border-radius:10px;">
               <div style="font-size:${i<3?'1.4rem':'1rem'};width:36px;text-align:center;font-weight:900;">${medal}</div>
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:.9rem;">${e.name||'—'}</div>
-                <div style="font-size:.72rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+                <div style="font-size:.72rem;color:var(--muted);">⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
               </div>
               <div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${e.score}</div>
             </div>`;
@@ -1864,11 +1868,14 @@ async function renderAdminLive(){
         <div style="display:grid;gap:.4rem;">
           ${lb.slice(0,10).map((e,i)=>{
             const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+            const mins=Math.floor((e.timeTaken||0)/60);
+            const secs=(e.timeTaken||0)%60;
+            const timeStr=mins>0?mins+'m '+secs+'s':secs+'s';
             return `<div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .7rem;background:#ffffff08;border-radius:10px;">
               <div style="font-size:${i<3?'1.3rem':'.9rem'};width:32px;text-align:center;font-weight:900;">${medal}</div>
               <div style="flex:1;">
                 <div style="font-weight:600;font-size:.9rem;">${e.name}</div>
-                <div style="font-size:.72rem;color:var(--muted);">⏱ ${fmtSec(e.timeTaken)} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
+                <div style="font-size:.72rem;color:var(--muted);⏱ ${timeStr} &nbsp;·&nbsp; ${fmtDate(e.completedAt)}</div>
               </div>
               <div style="font-size:1.2rem;font-weight:900;color:var(--gold);">${e.score}</div>
             </div>`;
@@ -1877,7 +1884,7 @@ async function renderAdminLive(){
         </div>`:`<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:.5rem;">No attempts yet</div>`}
       `;
       container.appendChild(card);
-    }catch(e){console.error('Error loading quiz setup',e);}
+    }catch(e) {console.error(e);}
   }
 }
 
@@ -1889,7 +1896,7 @@ function renderAdminAnalytics(){
     const st=getQuizStatus(q);
     return `<div class="card2">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
-        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
+        <div><div style="font-weight:700;">${q.title}</div><div style="font-size:.78rem;color:var(--muted);">by ${q.hostName} · <span class="badge badge-${st}">${st}</span></div></div>
         <div style="display:flex;gap:.8rem;">
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;">${q.attemptCount||0}</div><div class="stat-lbl">Attempts</div></div>
           <div class="stat-card" style="min-width:60px;"><div class="stat-num" style="font-size:1.3rem;color:var(--blue);">${avg}</div><div class="stat-lbl">Avg Score</div></div>
@@ -1897,11 +1904,11 @@ function renderAdminAnalytics(){
       </div>
       <div style="font-size:.8rem;color:var(--muted);">${q.questions?.length||0} Questions · ${q.mode==='flash'?'⚡ Flash':'📝 Normal'} · ${q.duration}min</div>
     </div>`;
-  }).join('');
+  }).join(''):`<div class="card2" style="text-align:center;color:var(--muted);padding:2rem;">No quiz data yet.</div>`;
 }
 
 // ══════════════════════════════════════════════
-// ANALYTICS AND TRANSLATION FORMATTERS
+// FORMATTERS AND TRANSLATION AGENTS
 // ══════════════════════════════════════════════
 function fmtSec(s){
   if(!s&&s!==0)return '—';
@@ -1918,7 +1925,7 @@ function showFeedback(msg,correct){
 }
 
 // ══════════════════════════════════════════════
-// BUSINESS CONVERGENCE ASSIGNMENT MODALS
+// UTILITY SUBSCRIPTION SYSTEM INTERFACES
 // ══════════════════════════════════════════════
 function showContactModal(plan){
   const existing=document.getElementById('contact-modal');
@@ -1929,36 +1936,30 @@ function showContactModal(plan){
   overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
   overlay.innerHTML=`
     <div style="background:var(--card);border-radius:20px;padding:1.8rem;width:100%;max-width:420px;box-shadow:0 24px 64px #0008;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12rem;">
         <div>
           <div style="font-weight:800;font-size:1.1rem;color:var(--gold);">Apply for ${plan} Plan</div>
-          <div style="font-size:.8rem;color:var(--muted);margin-top:.2rem;">Send us an email to get started</div>
         </div>
         <button onclick="document.getElementById('contact-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.4rem;line-height:1;">✕</button>
       </div>
       <div style="background:#ffffff06;border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;border:1px solid #ffffff0d;">
-        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Step 1 — Send your request to</div>
-        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Send your request to</div>
+        <div style="display:flex;align-items:center;gap:.8rem;">
           <div style="font-size:1.3rem;">📧</div>
-          <div>
-            <div style="font-weight:700;color:var(--gold);font-size:.95rem;">apexlogic2025@gmail.com</div>
-          </div>
-          <button onclick="navigator.clipboard.writeText('apexlogic2025@gmail.com')" style="margin-left:auto;background:transparent;border:1px solid #ffffff22;color:var(--muted);border-radius:8px;padding:.25rem .6rem;cursor:pointer;font-size:.75rem;">Copy</button>
+          <div><div style="font-weight:700;color:var(--gold);font-size:.95rem;">apexlogic2025@gmail.com</div></div>
         </div>
       </div>
-      <div style="display:flex;gap:.8rem;">
-        <button onclick="document.getElementById('contact-modal').remove()" style="background:#ffffff12;border:none;color:var(--muted);padding:.8rem 1.2rem;border-radius:12px;font-weight:600;cursor:pointer;font-size:.9rem;width:100%;">Close</button>
-      </div>
+      <button onclick="document.getElementById('contact-modal').remove()" style="background:#ffffff12;border:none;color:var(--muted);padding:.8rem 1.2rem;border-radius:12px;font-weight:600;cursor:pointer;font-size:.9rem;width:100%;">Close</button>
     </div>`;
   document.body.appendChild(overlay);
 }
 
 // ══════════════════════════════════════════════
-// APPLICATION SHELL DESKTOP PWA REGISTRATION
+// EMBEDDED GENERATIVE DESKTOP MANIFEST AGENTS
 // ══════════════════════════════════════════════
 const _iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="purple"/><text x="256" y="360" font-size="300" text-anchor="middle">&#x1F9E0;</text></svg>`;
 const _iconUrl='data:image/svg+xml;base64,'+btoa(_iconSvg);
-const _manifest={name:'QuizSelf',short_name:'QuizSelf',start_url:'./',display:'standalone',background_color:'#0f0f1a',theme_color:'#7c3aed',icons:[{src:_iconUrl,sizes:'512x512',type:'image/svg+xml'}]};
+const _manifest={name:'QuizSelf',short_name:'QuizSelf',start_url:'./',display:'standalone',background_color:'#0f0f1a',theme_color:'#7c3aed',icons:[{src:_iconUrl,sizes='512x512',type:'image/svg+xml'}]};
 const _mblob=new Blob([JSON.stringify(_manifest)],{type:'application/manifest+json'});
 const _mlink=document.createElement('link');_mlink.rel='manifest';_mlink.href=URL.createObjectURL(_mblob);document.head.appendChild(_mlink);
 window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.search);const qc=p.get('quiz');if(qc){S('take-quiz');document.getElementById('tq-code').value=qc.toUpperCase();}});
@@ -1970,32 +1971,21 @@ window.addEventListener('load',()=>{const p=new URLSearchParams(window.location.
     <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
       <h2 class="gold" style="margin-bottom:.4rem;">Privacy Policy</h2>
       <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
-      <p style="margin-bottom:1.2rem;">QuizSelf ("we", "our", "us") is operated by Apexlogic (India). This policy explains how we collect, use, and protect your personal information when you use QuizSelf.</p>
-      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Information We Collect</h3>
-      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Host accounts:</strong> Full name, email address, mobile number, and organisation/institution details.</p>
-      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Quiz participants:</strong> Name and optional email address entered to generate leaderboards.</p>
-      <h3 style="color:#fff;margin:.8rem 0 .4rem;">2. Google AdSense compliance</h3>
-      <p style="margin-bottom:1.2rem;">We partner with Google AdSense to surface ads. Google makes use of cookie tracking matrices to serve personalized variations relative to individual search behaviors. You may disable tracking arrays directly at your local browser level or through general settings dashboards.</p>
+      <p style="margin-bottom:1.2rem;">QuizSelf is operated by Apexlogic (India). This policy governs the analytical parameters tracked relative to exam compilation datasets.</p>
+      <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Information Profiles</h3>
+      <p style="margin-bottom:.8rem;"><strong style="color:#FFD700;">Host Data:</strong> Full identification parameters needed to track compliance tiers across the network.</p>
     </div>
   </div>
 </div>
 
 <div id="terms" class="screen">
   <div style="width:100%;max-width:740px;margin:auto;padding-top:1.5rem;">
-    <div class="topbar" style="max-width:740px;">
-      <button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Home</button>
-      <span class="gold" style="font-weight:800;">Terms of Use</span>
-      <span></span>
-    </div>
+    <div class="topbar" style="max-width:740px;"><button class="btn btn-k btn-sm" onclick="S('landing')">&#8592; Home</button><span class="gold" style="font-weight:800;">Terms of Use</span><span></span></div>
     <div class="card" style="max-width:100%;line-height:1.9;font-size:.93rem;color:#ccc;">
       <h2 class="gold" style="margin-bottom:.4rem;">Terms of Use</h2>
       <p style="color:#555;margin-bottom:1.5rem;font-size:.82rem;">Last updated: March 2026 &nbsp;·&nbsp; Apexlogic / QuizSelf</p>
-      
       <h3 style="color:#fff;margin:.8rem 0 .4rem;">1. Acceptable Utilization Profiles</h3>
-      <p style="margin-bottom:1.2rem;">Users are bound to refrain from executing script injection loops, bot attacks, or score inflation operations against our distributed Firebase cloud structures. Infractions warrant immediate termination from the platform database clusters.</p>
-      
-      <h3 style="color:#fff;margin:.8rem 0 .4rem;">2. Governing Law</h3>
-      <p style="margin-bottom:1.2rem;">These terms are governed by the laws of India. Any disputes shall be resolved in the courts of competent jurisdiction in India.</p>
+      <p style="margin-bottom:1.2rem;">Users are bound to refrain from executing script injection loops, bot attacks, or score inflation operations against our distributed Firebase cloud structures.</p>
     </div>
   </div>
 </div>
